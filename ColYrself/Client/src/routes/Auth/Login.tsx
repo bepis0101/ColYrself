@@ -21,7 +21,7 @@ export default function Login() {
   const mutation = useMutation({
     mutationFn: ({ email, password }: { email: string; password: string }) => fetchLogin(email, password),
     onSuccess: (data) => {
-      
+      console.log(data)
     },
     onError: (error) => {
       console.error('Login error:', error);
