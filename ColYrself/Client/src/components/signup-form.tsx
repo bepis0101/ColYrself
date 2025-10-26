@@ -17,6 +17,7 @@ import {
 import { Input } from "@/components/ui/input"
 
 import { useState } from "react";
+import { Spinner } from "./ui/spinner"
 
 export interface ISignupProps {
   handleSignUp: (email: string, username: string, password: string, repeatPassword: string) => void;
@@ -34,6 +35,12 @@ export function SignupForm({
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    handleSignUp(email, username, password, repeatPassword);
+  }
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -44,7 +51,7 @@ export function SignupForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={() => handleSignUp(email, username, password, repeatPassword)}>
+          <form onSubmit={handleSubmit}>
             <FieldGroup>
               <Field>
                 <FieldLabel htmlFor="name">Username</FieldLabel>
@@ -97,7 +104,10 @@ export function SignupForm({
                 </FieldDescription>
               </Field>
               <Field>
-                <Button type="submit">Create Account</Button>
+                <Button type="submit">
+                  {props.isPending && <Spinner />}
+                  {props.isPending ? 'Loading...' : 'Create Account'}
+                </Button>
                 <FieldDescription className="text-center">
                   Already have an account? <a href="login">Sign in</a>
                 </FieldDescription>

@@ -16,7 +16,22 @@ namespace ColYrself
 
             builder.Services
                 .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie();
+                .AddCookie(options =>
+                {
+                    options.Cookie.HttpOnly = true;
+                    options.Cookie.SameSite = SameSiteMode.None;
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                    options.Events.OnRedirectToLogin = ctx =>
+                    {
+                        ctx.Response.StatusCode = 401; // return 401 instead of redirect
+                        return Task.CompletedTask;
+                    };
+                    options.Events.OnRedirectToAccessDenied = ctx =>
+                    {
+                        ctx.Response.StatusCode = 403; // return 403 instead of redirect
+                        return Task.CompletedTask;
+                    };
+                });
 
             builder.Services.AddDbContext<AccountDbContext>(options =>
             {
@@ -25,10 +40,11 @@ namespace ColYrself
 
             builder.Services.AddCors(options =>
             {
-                options.AddDefaultPolicy(builder =>
+                options.AddPolicy("FrontendPolicy", policy =>
                 {
-                    builder
-                        .AllowAnyOrigin()
+                    policy
+                        .WithOrigins("http://localhost:5173")
+                        .AllowCredentials()
                         .AllowAnyHeader()
                         .AllowAnyMethod();
                 });
@@ -44,12 +60,11 @@ namespace ColYrself
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+            app.UseCors("FrontendPolicy");
             
             app.UseAuthentication();
             
             app.UseAuthorization();
-
-            app.UseCors();
 
             app.MapControllers();
 

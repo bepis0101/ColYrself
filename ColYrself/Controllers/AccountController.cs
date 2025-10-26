@@ -2,10 +2,12 @@
 using ColYrself.DataProvider.Models.Views;
 using ColYrself.DataProvider.Services;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using ColYrself.DataProvider.Models.Database;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace ColYrself.Controllers
 {
@@ -29,8 +31,17 @@ namespace ColYrself.Controllers
         {
             var service = new LoginService(_context);
             var response = await service.TryLogin(user);
-            if (response == null) return Unauthorized();
-            await HttpContext.SignInAsync(ClaimGen.GeneratePrincipal(response));
+            if (response == null || response.UserObj == null) return Unauthorized(response.ErrorMessage);
+            var claims = ClaimGen.GeneratePrincipal(response.UserObj);
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme, 
+                claims,
+                new AuthenticationProperties
+                {
+                    IsPersistent = true,
+                    ExpiresUtc = DateTime.UtcNow.AddDays(7),    
+                }
+            );
             return Ok(response);
         }
         [HttpPost("SignUp")]
@@ -43,9 +54,9 @@ namespace ColYrself.Controllers
                 case RegistartionStatus.Success:
                     return Ok();
                 case RegistartionStatus.PasswordsDontMatch:
-                    return BadRequest("Passwords don't match");
+                    return Unauthorized("Passwords don't match");
                 case RegistartionStatus.UserFound:
-                    return BadRequest("Account already exists");
+                    return Unauthorized("Account already exists");
                 default:
                     return NotFound();
             }
@@ -55,6 +66,25 @@ namespace ColYrself.Controllers
         {
             await HttpContext.SignOutAsync();
             return Ok();
+        }
+        [Authorize]
+        [HttpGet("Me")]
+        public async Task<IActionResult> GetCurrent()
+        {
+            var userId = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var username = HttpContext.User.Identity?.Name;
+            var email = HttpContext.User.FindFirstValue(ClaimTypes.Email);
+            var user = new UserLoginResponse()
+            {
+                ErrorMessage = "",
+                UserObj = new User()
+                {
+                    email = email,
+                    id = Guid.Parse(userId),
+                    username = username
+                }
+            };
+            return Ok(user);
         }
     }
 }

@@ -1,15 +1,60 @@
-import { createContext, useContext, useState } from "react";
-import type {User} from "@/types/user";
+import { createContext, useContext } from "react";
+import type { User } from "@/types/user";
+import { Spinner } from "@/components/ui/spinner";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 interface AuthContextType {
   user: User | null;
+  login: (user: User) => void;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  return <AuthContext.Provider value={{ user }}>{children}</AuthContext.Provider>;
+  const queryClient = useQueryClient();
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["me"],
+    queryFn: async () => {
+      const res = await fetch(`${API_URL}account/me`, {
+        method: "GET",
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Not authenticated");
+      return res.json();
+    },
+    retry: false,
+  });
+
+  const logoutMutation = useMutation({
+    mutationKey: ["logout"],
+    mutationFn: async () => {
+      const res = await fetch(`${API_URL}account/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Logout failed");
+      return res.json();
+    }
+  });
+
+  function logout() {
+    queryClient.setQueryData(["me"], null);
+    logoutMutation.mutate();
+  }
+
+  function login(user: User) {
+    queryClient.setQueryData(["me"], user);
+  }
+
+  return (
+    <AuthContext.Provider value={{ user: data ? data.userObj : null, login, logout }}>
+      {isLoading ? <Spinner /> : children}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuth = (): AuthContextType => {

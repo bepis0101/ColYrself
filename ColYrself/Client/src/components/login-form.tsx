@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Spinner } from "@/components/ui/spinner"
 import { useState } from "react";
 import type { MouseEventHandler } from "react";
 
@@ -91,6 +92,7 @@ export function LoginForm({
                   />
                 </div>
                 <Button type="submit" className="w-full">
+                  {props.isPending && <Spinner />}
                   {props.isPending ? 'Loading...' : 'Login'}
                 </Button>
               </div>

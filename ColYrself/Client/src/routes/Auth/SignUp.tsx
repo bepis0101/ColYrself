@@ -1,12 +1,14 @@
 import { SignupForm } from '@/components/signup-form'
 import { useMutation } from '@tanstack/react-query'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import type { Register } from '@/types/user'
+import { toast } from 'sonner'
 export const Route = createFileRoute('/Auth/SignUp')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
+  const navigate = useNavigate();
   async function fetchSignup(
     email: string, 
     username: string, 
@@ -18,16 +20,22 @@ function RouteComponent() {
       body: JSON.stringify({ email, username, password, repeatPassword }),
     });
 
-    if (!res.ok) throw new Error('Network response was not ok');
+    if (!res.ok) {
+      const errorData = await res.text();
+      toast.error('Signup failed: ' + errorData);
+      return res.json();
+    }
+
     return res.json();
   }
-
+  
   const mutation = useMutation({
     mutationFn: ({email, username, password, repeatPassword} : Register) => 
       fetchSignup(email, username, password, repeatPassword),
-    onSuccess: (data) => {
-      
-    }
+    onSuccess: () => {
+      toast.success('Account created successfully!');
+      navigate({ to: '/Auth/Login' });
+    },
   })
 
   function handleSignUp(
@@ -36,7 +44,9 @@ function RouteComponent() {
     password: string, 
     repeatPassword: string) {
     if (password !== repeatPassword) {
-      
+      toast.error('Passwords do not match');
+    } else {
+      mutation.mutate({ email, username, password, repeatPassword });
     }
   }
 

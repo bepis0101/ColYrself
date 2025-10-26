@@ -9,9 +9,15 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthSignUpRouteImport } from './routes/Auth/SignUp'
 import { Route as AuthLoginRouteImport } from './routes/Auth/Login'
 
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthSignUpRoute = AuthSignUpRouteImport.update({
   id: '/Auth/SignUp',
   path: '/Auth/SignUp',
@@ -24,33 +30,44 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
   '/Auth/Login': typeof AuthLoginRoute
   '/Auth/SignUp': typeof AuthSignUpRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
   '/Auth/Login': typeof AuthLoginRoute
   '/Auth/SignUp': typeof AuthSignUpRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
   '/Auth/Login': typeof AuthLoginRoute
   '/Auth/SignUp': typeof AuthSignUpRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/Auth/Login' | '/Auth/SignUp'
+  fullPaths: '/' | '/Auth/Login' | '/Auth/SignUp'
   fileRoutesByTo: FileRoutesByTo
-  to: '/Auth/Login' | '/Auth/SignUp'
-  id: '__root__' | '/Auth/Login' | '/Auth/SignUp'
+  to: '/' | '/Auth/Login' | '/Auth/SignUp'
+  id: '__root__' | '/' | '/Auth/Login' | '/Auth/SignUp'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthSignUpRoute: typeof AuthSignUpRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/Auth/SignUp': {
       id: '/Auth/SignUp'
       path: '/Auth/SignUp'
@@ -69,6 +86,7 @@ declare module '@tanstack/react-router' {
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthSignUpRoute: AuthSignUpRoute,
 }

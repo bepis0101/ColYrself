@@ -1,30 +1,40 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { LoginForm } from "@/components/login-form";
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
+import type { User } from '@/types/user';
 
 export const Route = createFileRoute('/Auth/Login')({
   component: Login,
 })
 
 export default function Login() {
+  const navigate = useNavigate();
   async function fetchLogin(email: string, password: string) {
     const res = await fetch(`${import.meta.env.VITE_API_URL}account/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
+      credentials: 'include',
     });
-
-    if (!res.ok) throw new Error('Network response was not ok');
+    if(!res.ok) {
+      const errorData = await res.text();
+      toast.error('Login failed: ' + errorData);
+      throw new Error(errorData || 'Login failed');
+    }
     return res.json();
   }
-
+  const auth = useAuth()
+  const queryClient = useQueryClient();
   const mutation = useMutation({
     mutationFn: ({ email, password }: { email: string; password: string }) => fetchLogin(email, password),
     onSuccess: (data) => {
-      console.log(data)
-    },
-    onError: (error) => {
-      console.error('Login error:', error);
+      toast.success('Login successful!');
+      const user: User = data.userObj as User;
+      auth.login(user);
+      queryClient.invalidateQueries({ queryKey: ['me'] });
+      navigate({ to: '/' });
     },
   });
 
