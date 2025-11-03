@@ -8,9 +8,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
-import { Video, ScreenShare, Lock } from "lucide-react"; // <-- New icons
+import { Video, ScreenShare, Lock } from "lucide-react";
 
-// This defines the route for your landing page, attaching it to the '/' path.
 export const Route = createFileRoute("/")({
   component: LandingPage,
 });
@@ -116,11 +115,9 @@ function LandingPage() {
           </Button>
         </section>
       )}
-
-      {/* Simple Footer */}
-      <footer className="py-12 text-center text-muted-foreground">
+      {/* <footer className="py-12 text-center text-muted-foreground">
         <p>© {new Date().getFullYear()} Col Yrself. All rights reserved.</p>
-      </footer>
+      </footer> */}
     </main>
   );
 }

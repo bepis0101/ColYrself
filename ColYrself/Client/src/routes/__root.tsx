@@ -75,11 +75,11 @@ function TopMenu() {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="relative h-8 w-8 rounded-full"
+                  className="relative h-8 w-8 rounded-full cursor-pointer"
                 >
                   <Avatar className="h-8 w-8">
                     <AvatarImage
-                      src={`https://placehold.co/100x100/A0A0A0/FFFFFF?text=${user.username[0]}`}
+                      src={`https://placehold.co/100x100/A0A0A0/FFFFFF?text=${user.username[0].toUpperCase()}`}
                       alt={`${user.username[0]}`}
                     />
                     <AvatarFallback>{user.username[0]}</AvatarFallback>
