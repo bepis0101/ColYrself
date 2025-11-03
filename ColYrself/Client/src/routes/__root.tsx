@@ -12,7 +12,6 @@ import {
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 
@@ -41,8 +40,7 @@ function TopMenu() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 max-w-screen-2xl items-center px-4">
         <div className="w-[180px] hidden md:flex">
-          <a href="#" className="flex items-center space-x-2">
-            
+          <a href="/" className="flex items-center space-x-2">
             <span className="font-bold sm:inline-block">Col Yrself</span>
           </a>
         </div>
@@ -52,19 +50,10 @@ function TopMenu() {
             <NavigationMenuList className="w-full justify-center gap-8">
               <NavigationMenuItem>
                 <NavigationMenuLink
-                  href="/"
+                  href="/dashboard"
                   className={navigationMenuTriggerStyle()}
                 >
                   Dashboard
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-
-              <NavigationMenuItem>
-                <NavigationMenuLink
-                  href="#"
-                  className={navigationMenuTriggerStyle()}
-                >
-                  Pricing
                 </NavigationMenuLink>
               </NavigationMenuItem>
 
@@ -128,8 +117,8 @@ function TopMenu() {
         )}
         {!user && (
           <div className="w-[180px] flex items-center justify-end gap-2">
-            <Button onClick={() => navigate({to: '/Auth/Login'})}>Log in</Button>
-            <Button variant="outline" onClick={() => navigate({to: '/Auth/SignUp'})}>Sign up</Button>
+            <Button className="cursor-pointer" onClick={() => navigate({to: '/Auth/Login'})}>Log in</Button>
+            <Button className="cursor-pointer" variant="outline" onClick={() => navigate({to: '/Auth/SignUp'})}>Sign up</Button>
           </div>
         )}
       </div>

@@ -35,7 +35,12 @@ namespace ColYrself
 
             builder.Services.AddDbContext<AccountDbContext>(options =>
             {
-                options.UseSqlite("DataSource=..\\ColYrself.DataProvider\\Databases\\user.db");
+                options.UseSqlite("DataSource=..\\ColYrself.DataProvider\\Database\\user.db");
+            });
+
+            builder.Services.AddDbContext<MeetingContext>(options =>
+            {
+                options.UseSqlite("DataSource=..\\ColYrself.DataProvider\\Database\\meetings.db");
             });
 
             builder.Services.AddCors(options =>

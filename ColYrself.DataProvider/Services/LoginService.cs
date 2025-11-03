@@ -13,15 +13,41 @@ namespace ColYrself.DataProvider.Services
             _context = context;
         }
 
-        public async Task<User?> TryLogin(LoginDetails model)
+        public async Task<UserLoginResponse> TryLogin(LoginDetails model)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.email == model.Email);
-            if (user == null) return null;
+            if (user == null)
+            {
+                return new UserLoginResponse()
+                {
+                    ErrorMessage = "Incorrect password or user doesn't exist",
+                };
+            }
             var password = await _context.Passwords.FirstOrDefaultAsync(p => p.user_id == user.id);
-            if(password == null) return null;
+            if(password == null)
+            {
+                return new UserLoginResponse()
+                {
+                    ErrorMessage = "Incorrect password or user doesn't exist",
+                };
+            }
             var verification = PasswordService.VerifyPassword(model.Password, password.password);
-            if(!verification) return null;
-            return user;
+            if(!verification)
+            {
+                return new UserLoginResponse()
+                {
+                    ErrorMessage = "Incorrect password or user doesn't exist",
+                };
+            }
+            return new UserLoginResponse()
+            {
+                UserObj = user
+            };
         }
+    }
+    public class UserLoginResponse
+    {
+        public User? UserObj { get; set; } = null;
+        public string? ErrorMessage { get; set; }
     }
 }

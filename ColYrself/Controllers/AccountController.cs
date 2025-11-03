@@ -31,7 +31,7 @@ namespace ColYrself.Controllers
         {
             var service = new LoginService(_context);
             var response = await service.TryLogin(user);
-            if (response == null || response.UserObj == null) return Unauthorized(response.ErrorMessage);
+            if (response == null || response.UserObj == null) return Unauthorized(response?.ErrorMessage);
             var claims = ClaimGen.GeneratePrincipal(response.UserObj);
             await HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme, 
@@ -39,7 +39,7 @@ namespace ColYrself.Controllers
                 new AuthenticationProperties
                 {
                     IsPersistent = true,
-                    ExpiresUtc = DateTime.UtcNow.AddDays(7),    
+                    ExpiresUtc = DateTime.UtcNow.AddDays(7),
                 }
             );
             return Ok(response);
@@ -69,11 +69,19 @@ namespace ColYrself.Controllers
         }
         [Authorize]
         [HttpGet("Me")]
-        public async Task<IActionResult> GetCurrent()
+        public IActionResult GetCurrent()
         {
             var userId = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
             var username = HttpContext.User.Identity?.Name;
             var email = HttpContext.User.FindFirstValue(ClaimTypes.Email);
+            if(userId == null || username == null || email == null)
+            {
+                return Unauthorized();
+            }
+            if(Guid.Parse(userId) == Guid.Empty)
+            {
+                return NotFound();
+            }
             var user = new UserLoginResponse()
             {
                 ErrorMessage = "",
