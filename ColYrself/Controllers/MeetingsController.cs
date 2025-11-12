@@ -33,6 +33,7 @@ namespace ColYrself.Controllers
             var dbMeeting = new Meeting()
             {
                 id = Guid.NewGuid(),
+                name = meeting.Name,
                 organizer = user,
                 date = meeting.Date,
                 time = meeting.Time,

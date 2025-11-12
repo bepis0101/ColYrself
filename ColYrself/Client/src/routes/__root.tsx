@@ -1,8 +1,8 @@
-import * as React from "react";
 import { createRootRoute, Outlet, useNavigate } from '@tanstack/react-router'
 
 import {
   CircleUser,
+  ExternalLink,
   LogOut,
   Settings,
 } from "lucide-react";
@@ -58,11 +58,17 @@ function TopMenu() {
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <NavigationMenuLink
-                  href="http://github.com/bepis0101/ColYrself"
-                  className={navigationMenuTriggerStyle()}
-                >
-                  Contribute
+                <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                  <a
+                    href="http://github.com/bepis0101/ColYrself"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      Contribute
+                      <ExternalLink className="h-4 w-4" />
+                    </div>
+                  </a>
                 </NavigationMenuLink>
               </NavigationMenuItem>
             </NavigationMenuList>
@@ -79,7 +85,7 @@ function TopMenu() {
                 >
                   <Avatar className="h-8 w-8">
                     <AvatarImage
-                      src={`https://placehold.co/100x100/A0A0A0/FFFFFF?text=${user.username[0].toUpperCase()}`}
+                      src={`https://placehold.co/100x100/2196F3/FFFFFF?text=${user.username[0].toUpperCase()}`}
                       alt={`${user.username[0]}`}
                     />
                     <AvatarFallback>{user.username[0]}</AvatarFallback>
