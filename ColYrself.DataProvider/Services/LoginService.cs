@@ -15,7 +15,7 @@ namespace ColYrself.DataProvider.Services
 
         public async Task<UserLoginResponse> TryLogin(LoginDetails model)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.email == model.Email);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.username == model.Username);
             if (user == null)
             {
                 return new UserLoginResponse()

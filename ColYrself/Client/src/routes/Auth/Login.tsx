@@ -11,11 +11,11 @@ export const Route = createFileRoute('/Auth/Login')({
 
 export default function Login() {
   const navigate = useNavigate();
-  async function fetchLogin(email: string, password: string) {
+  async function fetchLogin(username: string, password: string) {
     const res = await fetch(`${import.meta.env.VITE_API_URL}account/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ username, password }),
       credentials: 'include',
     });
     if(!res.ok) {
@@ -28,7 +28,7 @@ export default function Login() {
   const auth = useAuth()
   const queryClient = useQueryClient();
   const mutation = useMutation({
-    mutationFn: ({ email, password }: { email: string; password: string }) => fetchLogin(email, password),
+    mutationFn: ({ username, password }: { username: string; password: string }) => fetchLogin(username, password),
     onSuccess: (data) => {
       toast.success('Login successful!');
       const user: User = data.userObj as User;
@@ -42,8 +42,8 @@ export default function Login() {
     e.preventDefault();
   }
 
-  function handleLogin(email: string, password: string) {
-    mutation.mutate({ email, password });
+  function handleLogin(username: string, password: string) {
+    mutation.mutate({ username, password });
   }
 
   return (

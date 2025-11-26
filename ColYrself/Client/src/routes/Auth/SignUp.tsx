@@ -22,11 +22,9 @@ function RouteComponent() {
 
     if (!res.ok) {
       const errorData = await res.text();
-      toast.error('Signup failed: ' + errorData);
-      return res.json();
+      throw new Error(errorData || 'Signup failed');
     }
-
-    return res.json();
+    return;
   }
   
   const mutation = useMutation({
@@ -36,6 +34,9 @@ function RouteComponent() {
       toast.success('Account created successfully!');
       navigate({ to: '/Auth/Login' });
     },
+    onError: (error: Error) => {
+      toast.error('Signup failed: ' + error.message);
+    }
   })
 
   function handleSignUp(

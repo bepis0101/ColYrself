@@ -2,10 +2,11 @@ import { createContext, useContext } from "react";
 import type { User } from "@/types/user";
 import { Spinner } from "@/components/ui/spinner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-interface AuthContextType {
+export interface AuthContextType {
   user: User | null;
   login: (user: User) => void;
   logout: () => void;
@@ -37,6 +38,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         credentials: "include",
       });
       if (!res.ok) throw new Error("Logout failed");
+      toast.success("Logged out successfully");
       return res.json();
     }
   });

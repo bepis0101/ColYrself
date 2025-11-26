@@ -56,7 +56,14 @@ function TopMenu() {
                   Dashboard
                 </NavigationMenuLink>
               </NavigationMenuItem>
-
+              <NavigationMenuItem>
+                <NavigationMenuLink
+                  href="/calendar"
+                  className={navigationMenuTriggerStyle()}
+                >
+                  Calendar
+                </NavigationMenuLink>
+              </NavigationMenuItem>
               <NavigationMenuItem>
                 <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
                   <a
@@ -81,7 +88,7 @@ function TopMenu() {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="relative h-8 w-8 rounded-full cursor-pointer"
+                  className="relative h-8 w-8 rounded-full"
                 >
                   <Avatar className="h-8 w-8">
                     <AvatarImage
@@ -123,8 +130,8 @@ function TopMenu() {
         )}
         {!user && (
           <div className="w-[180px] flex items-center justify-end gap-2">
-            <Button className="cursor-pointer" onClick={() => navigate({to: '/Auth/Login'})}>Log in</Button>
-            <Button className="cursor-pointer" variant="outline" onClick={() => navigate({to: '/Auth/SignUp'})}>Sign up</Button>
+            <Button onClick={() => navigate({to: '/Auth/Login'})}>Log in</Button>
+            <Button variant="outline" onClick={() => navigate({to: '/Auth/SignUp'})}>Sign up</Button>
           </div>
         )}
       </div>

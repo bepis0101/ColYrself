@@ -20,21 +20,20 @@ namespace ColYrself.DataProvider.Services
         }
         public async Task<RegistartionStatus> AuthorizeRegistration(SignUpDetails model)
         {
-            var findUser = await _context.Users.FirstOrDefaultAsync(u => u.email == model.Email);
+            var findUser = await _context.Users.FirstOrDefaultAsync(u => u.username == model.Username);
             if (findUser != null) return RegistartionStatus.UserFound;
             if (model.RepeatPassword != model.Password) return RegistartionStatus.PasswordsDontMatch;
-
+            var user_id = Guid.NewGuid();
             var user = new User()
             {
+                id = user_id,
                 email = model.Email,
                 username = model.Username
             };
             await _context.Users.AddAsync(user);
-            await _context.SaveChangesAsync();
-            user = await _context.Users.FirstOrDefaultAsync(u => u.email == model.Email);
             var password = new Password()
             {
-                user_id = user.id,
+                user_id = user_id,
                 password = PasswordService.HashPassword(model.Password)
             };
 

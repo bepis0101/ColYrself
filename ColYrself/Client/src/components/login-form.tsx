@@ -15,7 +15,7 @@ import type { MouseEventHandler } from "react";
 
 export interface ILoginProps {
   handleGoogleLogin?: MouseEventHandler;
-  handleNormalLogin: (email: string, password: string) => void;
+  handleNormalLogin: (username: string, password: string) => void;
   isPending?: boolean;
 }
 
@@ -25,12 +25,12 @@ export function LoginForm({
   handleNormalLogin,
   ...props
 }: React.ComponentProps<"div"> & ILoginProps) {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    handleNormalLogin(email, password);
+    handleNormalLogin(username, password);
   };
 
   return (
@@ -63,14 +63,13 @@ export function LoginForm({
               </div>
               <div className="grid gap-6">
                 <div className="grid gap-3">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="username">Username</Label>
                   <Input
-                    id="email"
-                    type="email"
-                    placeholder="m@example.com"
+                    id="username" 
+                    type="text"
                     required
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
+                    value={username}
+                    onChange={e => setUsername(e.target.value)}
                   />
                 </div>
                 <div className="grid gap-3">
