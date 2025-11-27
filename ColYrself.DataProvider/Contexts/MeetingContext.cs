@@ -8,11 +8,7 @@ namespace ColYrself.DataProvider.Contexts
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Meeting>()
-                .ToTable("meetings")
-                .HasOne(x => x.organizer)
-                .WithMany(x => x.organizedMeetings)
-                .HasForeignKey(x => x.organizerId);
-            
+                .ToTable("meetings"); 
             base.OnModelCreating(modelBuilder);
         }
         public MeetingContext(DbContextOptions<MeetingContext> options) : base(options)

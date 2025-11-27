@@ -12,12 +12,9 @@ namespace ColYrself.DataProvider.Contexts
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>()
-                .ToTable("users")
-                .HasMany(x => x.organizedMeetings)
-                .WithOne(x => x.organizer)
-                .HasForeignKey(x => x.organizerId);
-
-            modelBuilder.Entity<Password>().ToTable("passwords");
+                .ToTable("users");
+            modelBuilder.Entity<Password>()
+                .ToTable("passwords");
             base.OnModelCreating(modelBuilder);
         }
 

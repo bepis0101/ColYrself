@@ -20,10 +20,16 @@ namespace ColYrself.Controllers
         {
             _context = context;
         }
+        [Authorize]
         [HttpGet("GetUsers")]
         public async Task<IActionResult> GetUsers()
         {
-            var users = await _context.Users.ToListAsync();
+            var userId = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if(String.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+            var users = await _context.Users.Where(x => x.id != Guid.Parse(userId)).ToListAsync();
             return Ok(users);
         }
         [HttpPost("Login")]

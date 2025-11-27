@@ -75,12 +75,6 @@ export function LoginForm({
                 <div className="grid gap-3">
                   <div className="flex items-center">
                     <Label htmlFor="password">Password</Label>
-                    <a
-                      href="#"
-                      className="ml-auto text-sm underline-offset-4 hover:underline"
-                    >
-                      Forgot your password?
-                    </a>
                   </div>
                   <Input
                     id="password"
@@ -90,6 +84,12 @@ export function LoginForm({
                     onChange={e => setPassword(e.target.value)}
                   />
                 </div>
+                <a
+                  href="#"
+                  className="ml-auto text-sm underline-offset-4 hover:underline"
+                >
+                  Forgot your password?
+                </a>
                 <Button type="submit" className="w-full">
                   {props.isPending && <Spinner />}
                   {props.isPending ? 'Loading...' : 'Login'}

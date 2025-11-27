@@ -29,14 +29,13 @@ namespace ColYrself.Controllers
             {
                 return Unauthorized();
             }
-            _context.Attach(user);
+            var date = DateOnly.FromDateTime(DateTime.Parse(meeting.Date));
             var dbMeeting = new Meeting()
             {
                 id = Guid.NewGuid(),
                 name = meeting.Name,
-                organizer = user,
-                date = meeting.Date,
-                time = meeting.Time,
+                date = date,
+                time = TimeOnly.Parse(meeting.Time),
                 isPrivate = meeting.IsPrivate,
                 organizerId = user.id,
                 invitedIds = meeting.Invited
@@ -44,7 +43,6 @@ namespace ColYrself.Controllers
                     .ToArray()
                     
             };
-            user.organizedMeetings.Add(dbMeeting);
             await _context.AddAsync(dbMeeting);
             await _context.SaveChangesAsync();
             return Ok();
@@ -114,8 +112,8 @@ namespace ColYrself.Controllers
             {
                 return NotFound();
             }
-            meeting.date = details.Date;
-            meeting.time = details.Time;
+            meeting.date = DateOnly.Parse(details.Date);
+            meeting.time = TimeOnly.Parse(details.Time);
             meeting.isPrivate = details.IsPrivate;
             meeting.invitedIds = details.Invited.Select(x => Guid.Parse(x)).ToArray();
             await _context.SaveChangesAsync();

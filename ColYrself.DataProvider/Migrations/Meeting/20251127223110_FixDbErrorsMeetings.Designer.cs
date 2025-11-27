@@ -3,6 +3,7 @@ using System;
 using ColYrself.DataProvider.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ColYrself.DataProvider.Migrations.Meeting
 {
     [DbContext(typeof(MeetingContext))]
-    partial class MeetingContextModelSnapshot : ModelSnapshot
+    [Migration("20251127223110_FixDbErrorsMeetings")]
+    partial class FixDbErrorsMeetings
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.8");

@@ -10,8 +10,8 @@ namespace ColYrself.DataProvider.Models.Views
     {
         public string[] Invited { get; set; } = [];
         public string Name { get; set; }
-        public DateOnly Date { get; set; }
-        public TimeOnly Time { get; set; }
+        public string Date { get; set; }
+        public string Time { get; set; }
         public bool IsPrivate { get; set; }
     }
 }
