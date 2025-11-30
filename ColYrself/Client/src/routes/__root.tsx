@@ -37,7 +37,8 @@ function TopMenu() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur 
+    supports-[backdrop-filter]:bg-background/60 justify-between">
       <div className="container flex h-14 max-w-screen-2xl items-center px-4">
         <div className="w-[180px] hidden md:flex">
           <a href="/" className="flex items-center space-x-2">
@@ -130,8 +131,8 @@ function TopMenu() {
         )}
         {!user && (
           <div className="w-[180px] flex items-center justify-end gap-2">
-            <Button onClick={() => navigate({to: '/Auth/Login'})}>Log in</Button>
-            <Button variant="outline" onClick={() => navigate({to: '/Auth/SignUp'})}>Sign up</Button>
+            <Button onClick={() => navigate({to: '/auth/login'})}>Log in</Button>
+            <Button variant="outline" onClick={() => navigate({to: '/auth/signUp'})}>Sign up</Button>
           </div>
         )}
       </div>

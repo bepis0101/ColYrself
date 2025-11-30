@@ -3,7 +3,7 @@ import { useMutation } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import type { Register } from '@/types/user'
 import { toast } from 'sonner'
-export const Route = createFileRoute('/Auth/SignUp')({
+export const Route = createFileRoute('/auth/signUp')({
   component: RouteComponent,
 })
 
@@ -32,7 +32,7 @@ function RouteComponent() {
       fetchSignup(email, username, password, repeatPassword),
     onSuccess: () => {
       toast.success('Account created successfully!');
-      navigate({ to: '/Auth/Login' });
+      navigate({ to: '/auth/login' });
     },
     onError: (error: Error) => {
       toast.error('Signup failed: ' + error.message);

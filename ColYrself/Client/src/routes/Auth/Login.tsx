@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import type { User } from '@/types/user';
 
-export const Route = createFileRoute('/Auth/Login')({
+export const Route = createFileRoute('/auth/login')({
   component: Login,
 })
 

@@ -3,6 +3,7 @@ import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { routeTree } from './routeTree.gen'
 import { Toaster } from 'sonner'
 import { useAuth, type AuthContextType } from './contexts/AuthContext';
+import { ThemeProvider } from './components/ThemeProvider';
 
 const router = createRouter({ 
   routeTree,
@@ -21,8 +22,10 @@ export default function App() {
   const auth = useAuth();
   return (
     <>
-      <RouterProvider router={router} context={{ auth }}/>
-      <Toaster position='bottom-center' />
+      <ThemeProvider defaultTheme="system">
+        <RouterProvider router={router} context={{ auth }}/>
+        <Toaster position='bottom-center' />
+      </ThemeProvider>
     </>
   )
 }

@@ -32,15 +32,21 @@ function isPast(formVm: IMeetingDetails) {
   return dt < new Date();
 }
 
-export default function CreateEvent() {
+export default function CreateEvent({ date } : { date?: Date | undefined }) {
   const [formVm, setFormVm] = React.useState({
-    date: new Date(new Date().setHours(0, 0, 0, 0)),
+    date: date ?? new Date(new Date().setHours(0, 0, 0, 0)),
     invited: [],
     isPrivate: true,
     name: "",
     time: ""
   } as IMeetingDetails);
   const [chosen, setChosen] = React.useState<User[]>([]);
+
+  React.useEffect(() => {
+    if(date) {
+      setFormVm((prev) => ({...prev, date: date}))
+    }
+  }, [date]);
 
   React.useEffect(() => {
     setFormVm((prev) => ({...prev, invited: chosen.map((x) => x.id)}))
@@ -67,7 +73,7 @@ export default function CreateEvent() {
   }
 
   const eventCreationMutation = useMutation({
-    mutationFn: (vm: IMeetingDetails) => fetchSubmitEvent(vm),
+    mutationFn: async (vm: IMeetingDetails) => await fetchSubmitEvent(vm),
     onSuccess: (_) => {
       toast.success("Meeting created succesfully");
     }
@@ -100,7 +106,7 @@ export default function CreateEvent() {
         if(isOpen) return;
         setChosen([]);
         setFormVm({
-          date: new Date(new Date().setHours(0, 0, 0, 0)),
+          date: date ?? new Date(new Date().setHours(0, 0, 0, 0)),
           invited: [],
           isPrivate: true,
           name: "",
@@ -119,6 +125,7 @@ export default function CreateEvent() {
           onSubmit={(e) => { 
             e.preventDefault();
             handleSubmitEvent(); 
+
           }}>
           <DialogHeader>
             <DialogTitle>

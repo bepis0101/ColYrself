@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Empty, EmptyContent, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
-import { TvMinimalPlayIcon } from 'lucide-react';
+import { PenIcon, TrashIcon, TvMinimalPlayIcon } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import CreateEvent from '@/components/create-event';
 
-interface Meeting {
+export interface Meeting {
   id: string;
   name: string;
   date: string;
@@ -32,17 +32,27 @@ function RouteComponent() {
     return res.json();
   }
 
+  function parseMeetingTime(meeting: Meeting, now: number) {
+    const time = Date.parse(meeting.date + 'T' + meeting.time);
+    if(time < now) {
+      return `Started ${Math.floor((now - time) / (1000 * 60))} minutes ago`;
+    } else {
+      return `Starts in ${Math.floor((time - now) / (1000 * 60))} minutes`;
+    }
+  }
+
   const { data, isLoading } = useQuery<Meeting[]>({
     queryKey: ['activeMeetings'],
     queryFn: fetchActiveMeetings,
     refetchInterval: 60000,
     select: (meetings) => {
       return meetings
-        .filter(x => Date.parse(x.date) >= Date.now())
+        .filter((meeting) => {
+          const now = new Date();
+          const date = new Date(meeting.date + 'T' + meeting.time);
+          return Math.abs(now.getTime() - date.getTime()) <= 60 * 60 * 1000;
+        })
         .sort((a, b) => {
-          if(a.date === b.date) {
-            return Date.parse(a.time) - Date.parse(b.time);
-          }
           return Date.parse(a.date + "T" + a.time) - Date.parse(b.date + "T" + b.time);
         });
     }
@@ -67,32 +77,40 @@ function RouteComponent() {
               </EmptyContent>
             </Empty>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Organizer</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Time</TableHead>
-                  <TableHead>Join</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.map((meeting) => (
-                  <TableRow key={meeting.id}>
-                    <TableCell>{meeting.name}</TableCell>
-                    <TableCell>{meeting.organizerId}</TableCell>
-                    <TableCell>{meeting.date}</TableCell>
-                    <TableCell>{meeting.time}</TableCell>
-                    <TableCell>
-                      <Link to={`/dashboard`} className="text-blue-600 hover:underline">
-                        Join Meeting
-                      </Link>
-                    </TableCell>
+            <div className="m-9 p-3 border-1 rounded-2xl">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Time</TableHead>
+                    <TableHead className="text-right"></TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {data.map((meeting) => (
+                    <TableRow key={meeting.id}>
+                      <TableCell>{meeting.name}</TableCell>
+                      <TableCell>{parseMeetingTime(meeting, Date.now())}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex flex-row justify-end space-x-2 items-center">
+                          <Link to={`/dashboard`} className="text-blue-600 hover:underline mr-9">
+                            Join Meeting
+                          </Link>
+                          <div className="w-8 h-8 cursor-pointer flex justify-center 
+                          p-1 border-1 border-black rounded-md hover:bg-secondary/50">
+                            <PenIcon />
+                          </div>
+                          <div className="w-8 h-8 cursor-pointer flex justify-center 
+                          p-1 border-1 border-red-500 rounded-md hover:bg-secondary/50">
+                            <TrashIcon color='red' />
+                          </div>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )
         }
       </div>

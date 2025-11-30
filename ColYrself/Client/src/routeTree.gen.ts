@@ -11,10 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthSignUpRouteImport } from './routes/auth/signUp'
+import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedCalendarRouteImport } from './routes/_authenticated/calendar'
-import { Route as AuthSignUpRouteImport } from './routes/Auth/SignUp'
-import { Route as AuthLoginRouteImport } from './routes/Auth/Login'
 
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
@@ -23,6 +23,16 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthSignUpRoute = AuthSignUpRouteImport.update({
+  id: '/auth/signUp',
+  path: '/auth/signUp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: '/auth/login',
+  path: '/auth/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
@@ -35,53 +45,43 @@ const AuthenticatedCalendarRoute = AuthenticatedCalendarRouteImport.update({
   path: '/calendar',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthSignUpRoute = AuthSignUpRouteImport.update({
-  id: '/Auth/SignUp',
-  path: '/Auth/SignUp',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthLoginRoute = AuthLoginRouteImport.update({
-  id: '/Auth/Login',
-  path: '/Auth/Login',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/Auth/Login': typeof AuthLoginRoute
-  '/Auth/SignUp': typeof AuthSignUpRoute
   '/calendar': typeof AuthenticatedCalendarRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/signUp': typeof AuthSignUpRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/Auth/Login': typeof AuthLoginRoute
-  '/Auth/SignUp': typeof AuthSignUpRoute
   '/calendar': typeof AuthenticatedCalendarRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/signUp': typeof AuthSignUpRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
-  '/Auth/Login': typeof AuthLoginRoute
-  '/Auth/SignUp': typeof AuthSignUpRoute
   '/_authenticated/calendar': typeof AuthenticatedCalendarRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/signUp': typeof AuthSignUpRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/Auth/Login' | '/Auth/SignUp' | '/calendar' | '/dashboard'
+  fullPaths: '/' | '/calendar' | '/dashboard' | '/auth/login' | '/auth/signUp'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/Auth/Login' | '/Auth/SignUp' | '/calendar' | '/dashboard'
+  to: '/' | '/calendar' | '/dashboard' | '/auth/login' | '/auth/signUp'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
-    | '/Auth/Login'
-    | '/Auth/SignUp'
     | '/_authenticated/calendar'
     | '/_authenticated/dashboard'
+    | '/auth/login'
+    | '/auth/signUp'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -107,6 +107,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/signUp': {
+      id: '/auth/signUp'
+      path: '/auth/signUp'
+      fullPath: '/auth/signUp'
+      preLoaderRoute: typeof AuthSignUpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/login': {
+      id: '/auth/login'
+      path: '/auth/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -120,20 +134,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/calendar'
       preLoaderRoute: typeof AuthenticatedCalendarRouteImport
       parentRoute: typeof AuthenticatedRoute
-    }
-    '/Auth/SignUp': {
-      id: '/Auth/SignUp'
-      path: '/Auth/SignUp'
-      fullPath: '/Auth/SignUp'
-      preLoaderRoute: typeof AuthSignUpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/Auth/Login': {
-      id: '/Auth/Login'
-      path: '/Auth/Login'
-      fullPath: '/Auth/Login'
-      preLoaderRoute: typeof AuthLoginRouteImport
-      parentRoute: typeof rootRouteImport
     }
   }
 }
