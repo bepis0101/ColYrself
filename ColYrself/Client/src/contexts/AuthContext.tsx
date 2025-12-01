@@ -10,6 +10,7 @@ export interface AuthContextType {
   user: User | null;
   login: (user: User) => void;
   logout: () => void;
+  isLoading?: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -53,7 +54,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }
 
   return (
-    <AuthContext.Provider value={{ user: data ? data.userObj : null, login, logout }}>
+    <AuthContext.Provider value={{ user: data ? data.userObj : null, login, logout, isLoading }}>
       {isLoading ? <Spinner /> : children}
     </AuthContext.Provider>
   );

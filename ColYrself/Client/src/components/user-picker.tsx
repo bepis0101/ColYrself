@@ -15,7 +15,7 @@ export default function UserPicker({chosen, pickUser} : IUserPickerProps) {
   const [open, setOpen] = React.useState(false);
 
   async function fetchUsers() {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}account/getusers`, {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}account/users`, {
       method: "GET",
       headers: { 'Content-Type': 'application/json'},
       credentials: "include",

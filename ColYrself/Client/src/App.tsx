@@ -3,7 +3,7 @@ import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { routeTree } from './routeTree.gen'
 import { Toaster } from 'sonner'
 import { useAuth, type AuthContextType } from './contexts/AuthContext';
-import { ThemeProvider } from './components/ThemeProvider';
+import { ThemeProvider } from './components/theme-provider';
 
 const router = createRouter({ 
   routeTree,

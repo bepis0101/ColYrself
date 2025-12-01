@@ -1,9 +1,13 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Empty, EmptyContent, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import { PenIcon, TrashIcon, TvMinimalPlayIcon } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import CreateEvent from '@/components/create-event';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+
 
 export interface Meeting {
   id: string;
@@ -19,19 +23,19 @@ export const Route = createFileRoute('/_authenticated/dashboard')({
   component: RouteComponent,
 })
 
-function RouteComponent() {
-  async function fetchActiveMeetings() {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}meetings/getallmymeetings`, {
-      method: 'GET',
-      credentials: 'include',
-    });
-    if(!res.ok) {
-      const errorData = await res.text();
-      throw new Error(errorData || 'Failed to fetch meetings');
-    }
-    return res.json();
+export async function fetchActiveMeetings() {
+  const res = await fetch(`${import.meta.env.VITE_API_URL}meetings/active`, {
+    method: 'GET',
+    credentials: 'include',
+  });
+  if(!res.ok) {
+    const errorData = await res.text();
+    throw new Error(errorData || 'Failed to fetch meetings');
   }
+  return res.json();
+}
 
+function RouteComponent() {
   function parseMeetingTime(meeting: Meeting, now: number) {
     const time = Date.parse(meeting.date + 'T' + meeting.time);
     if(time < now) {
@@ -58,6 +62,34 @@ function RouteComponent() {
     }
   });
   
+  async function fetchDeleteMeeting(meetingId: string) {
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}meetings/delete/${encodeURIComponent(meetingId)}`,
+      {
+        method: "DELETE",
+        credentials: "include",
+      }
+    );
+    if (!res.ok) {
+      throw new Error("Failed to delete meeting");
+    }
+    return {}
+  }
+
+  const queryClient = useQueryClient();
+
+  const deleteMutation = useMutation({ 
+    mutationFn: (meetingId: string) => fetchDeleteMeeting(meetingId),
+    onSuccess: () => {
+      toast.success("Meeting deleted successfully");
+      queryClient.invalidateQueries({ queryKey: ['allActiveMeetings'] });
+      queryClient.invalidateQueries({ queryKey: ['activeMeetings'] });
+    },
+    onError: () => {
+      toast.error("Failed to delete meeting");
+    }
+  });
+
   return (
     <>
       <div className="align-center justify-center flex flex-col">
@@ -96,14 +128,36 @@ function RouteComponent() {
                           <Link to={`/dashboard`} className="text-blue-600 hover:underline mr-9">
                             Join Meeting
                           </Link>
-                          <div className="w-8 h-8 cursor-pointer flex justify-center 
-                          p-1 border-1 border-black rounded-md hover:bg-secondary/50">
+                          <Button variant="outline" className="w-8 h-8 flex justify-center 
+                          p-1 border-1 border-gray-500 rounded-md hover:bg-secondary/50">
                             <PenIcon />
-                          </div>
-                          <div className="w-8 h-8 cursor-pointer flex justify-center 
-                          p-1 border-1 border-red-500 rounded-md hover:bg-secondary/50">
-                            <TrashIcon color='red' />
-                          </div>
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="outline" className="w-8 h-8 flex justify-center 
+                              p-1 border-1 border-red-500 rounded-md hover:bg-secondary/50">
+                                <TrashIcon color='red' />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  Are you sure you want to delete this meeting?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This acction cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>
+                                  Cancel
+                                </AlertDialogCancel>
+                                <AlertDialogAction onClick={() => deleteMutation.mutate(meeting.id)}>
+                                  Continue
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </div>
                       </TableCell>
                     </TableRow>

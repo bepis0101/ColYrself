@@ -21,7 +21,7 @@ namespace ColYrself.Controllers
             _accountContext = accountContext;
         }
         [Authorize]
-        [HttpPost("CreateMeeting")]
+        [HttpPost("Create")]
         public async Task<IActionResult> CreateMeeting([FromBody] MeetingDetails meeting)
         {
             var user = UserService.GetUser(HttpContext, _accountContext);
@@ -41,7 +41,6 @@ namespace ColYrself.Controllers
                 invitedIds = meeting.Invited
                     .Select(x => Guid.Parse(x))
                     .ToArray()
-                    
             };
             await _context.AddAsync(dbMeeting);
             await _context.SaveChangesAsync();
@@ -49,7 +48,7 @@ namespace ColYrself.Controllers
         }
         
         [Authorize]
-        [HttpDelete("DeleteMeeting")]
+        [HttpDelete("Delete/{meetingId}")]
         public async Task<IActionResult> DeleteMeeting([FromRoute] string meetingId)
         {
             var user = UserService.GetUser(HttpContext, _accountContext);
@@ -83,7 +82,7 @@ namespace ColYrself.Controllers
         }
 
         [Authorize]
-        [HttpGet("GetAllMyMeetings")]
+        [HttpGet("Active")]
         public IActionResult GetMeetingsForCurrentUser()
         {
             var user = UserService.GetUser(HttpContext, _accountContext);
@@ -98,7 +97,7 @@ namespace ColYrself.Controllers
             return Ok(meetings);
         }
         [Authorize]
-        [HttpPut("UpdateMeeting")]
+        [HttpPut("Update")]
         public async Task<IActionResult> UpdateMeeting(string meetingId, [FromBody] MeetingDetails details)
         {
             var user = UserService.GetUser(HttpContext, _accountContext);

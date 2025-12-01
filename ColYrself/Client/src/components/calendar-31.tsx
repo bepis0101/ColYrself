@@ -9,6 +9,10 @@ export default function Calendar31({ meetings }: { meetings: Meeting[] }) {
   const [date, setDate] = React.useState<Date>(
     new Date()
   )
+  
+  const filtered = React.useMemo(() => {
+    return meetings.filter(x => new Date(x.date).getDate() === date.getDate())
+  }, [date, meetings])
 
   return (
     <Card className="py-4 w-full flex gap-12 flex-col">
@@ -23,7 +27,7 @@ export default function Calendar31({ meetings }: { meetings: Meeting[] }) {
         />
       </CardContent>
       <CardFooter className="flex flex-col items-start border-t !pt-4">
-        <div className="flex items-center justify-between w-full">
+        <div className={`flex items-center justify-between w-full ${filtered.length > 0 ? "mb-4" : ""}`}>
           <div className="text-sm font-medium">
             {date?.toLocaleDateString("en-US", {
               day: "numeric",
@@ -34,13 +38,13 @@ export default function Calendar31({ meetings }: { meetings: Meeting[] }) {
           <CreateEvent date={date} />
         </div>
         <div className="flex w-full flex-col gap-2">
-          {meetings.map((meeting) => (
+          {filtered.map((meeting) => (
             <div
               key={meeting.id}
               className="bg-muted after:bg-primary/70 relative rounded-md p-2 pl-6 text-sm after:absolute after:inset-y-2 after:left-2 after:w-1 after:rounded-full"
             >
               <div className="font-medium">{meeting.name}</div>
-              <div className="font-small">{meeting.time}</div>
+              <div className="font-small">{meeting.time.slice(0, 5)}</div>
             </div>
           ))}
         </div>

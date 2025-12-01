@@ -21,7 +21,7 @@ namespace ColYrself.Controllers
             _context = context;
         }
         [Authorize]
-        [HttpGet("GetUsers")]
+        [HttpGet("Users")]
         public async Task<IActionResult> GetUsers()
         {
             var userId = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
