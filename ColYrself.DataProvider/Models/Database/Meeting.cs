@@ -2,12 +2,16 @@
 {
     public class Meeting
     {
-        public Guid id { get; set; }
-        public string name { get; set; }
-        public Guid organizerId { get; set; }
-        public DateOnly date {  get; set; }
-        public TimeOnly time { get; set; }
-        public Guid[] invitedIds { get; set; } = [];
-        public bool isPrivate { get; set; } = true;
+        // Properties
+        public Guid Id { get; set; }
+        public string Name { get; set; }
+        public DateOnly Date {  get; set; }
+        public TimeOnly Time { get; set; }
+        public bool IsPrivate { get; set; } = true;
+        // Navigation properties
+        public Guid OrganizerId { get; set; }
+        public User Organizer { get; set; }
+
+        public ICollection<User> InvitedUsers { get; set; } = [];
     }
 }

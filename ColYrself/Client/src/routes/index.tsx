@@ -34,7 +34,7 @@ function LandingPage() {
         </p>
         <div className="mt-8 flex gap-4">
           <Button asChild size="lg">
-            <Link to={user ? "/dashboard" : "/auth/signUp"}>
+            <Link to={user ? "/dashboard" : "/auth/signup"}>
               {user ? "Go to Your Dashboard" : "Get Started for Free"}
             </Link>
           </Button>
@@ -110,7 +110,7 @@ function LandingPage() {
             minutes. No credit card required.
           </p>
           <Button asChild size="lg" className="mt-8">
-            <Link to="/auth/signUp">Sign Up Now</Link>
+            <Link to="/auth/signup">Sign Up Now</Link>
           </Button>
         </section>
       )}

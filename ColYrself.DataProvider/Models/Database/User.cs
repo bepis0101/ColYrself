@@ -2,8 +2,11 @@
 {
     public class User
     {
-        public Guid id { get; set; }
-        public string username { get; set; }
-        public string email { get; set; }
+        public Guid Id { get; set; }
+        public string Username { get; set; }
+        public string Email { get; set; }
+        public ICollection<Password> Passwords { get; set; } = [];
+        public ICollection<Meeting> OrganizedMeetings { get; set; } = [];
+        public ICollection<Meeting> InvitedMeetings { get; set; } = [];
     }
 }

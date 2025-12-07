@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using ColYrself.DataProvider.Models.Database;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
@@ -15,8 +14,8 @@ namespace ColYrself.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
-        private readonly AccountDbContext _context;
-        public AccountController(AccountDbContext context)
+        private readonly ApplicationDbContext _context;
+        public AccountController(ApplicationDbContext context)
         {
             _context = context;
         }
@@ -29,7 +28,7 @@ namespace ColYrself.Controllers
             {
                 return Unauthorized();
             }
-            var users = await _context.Users.Where(x => x.id != Guid.Parse(userId)).ToListAsync();
+            var users = await _context.Users.Where(x => x.Id != Guid.Parse(userId)).ToListAsync();
             return Ok(users);
         }
         [HttpPost("Login")]
@@ -37,8 +36,8 @@ namespace ColYrself.Controllers
         {
             var service = new LoginService(_context);
             var response = await service.TryLogin(user);
-            if (response == null || response.UserObj == null) return Unauthorized(response?.ErrorMessage);
-            var claims = ClaimGen.GeneratePrincipal(response.UserObj);
+            if (response == null || response.Id == null) return Unauthorized(response?.ErrorMessage);
+            var claims = ClaimGen.GeneratePrincipal(response);
             await HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme, 
                 claims,
@@ -76,28 +75,8 @@ namespace ColYrself.Controllers
         [Authorize]
         [HttpGet("Me")]
         public IActionResult GetCurrent()
-        {
-            var userId = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var username = HttpContext.User.Identity?.Name;
-            var email = HttpContext.User.FindFirstValue(ClaimTypes.Email);
-            if(userId == null || username == null || email == null)
-            {
-                return Unauthorized();
-            }
-            if(Guid.Parse(userId) == Guid.Empty)
-            {
-                return NotFound();
-            }
-            var user = new UserLoginResponse()
-            {
-                ErrorMessage = "",
-                UserObj = new User()
-                {
-                    email = email,
-                    id = Guid.Parse(userId),
-                    username = username
-                }
-            };
+        {        
+            var user = UserService.GetUser(HttpContext, _context);
             return Ok(user);
         }
     }

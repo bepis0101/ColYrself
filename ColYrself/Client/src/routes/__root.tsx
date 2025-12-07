@@ -1,4 +1,4 @@
-import { createRootRoute, Outlet, useNavigate } from '@tanstack/react-router'
+import { createRootRoute, Link, Outlet, useNavigate } from '@tanstack/react-router'
 
 import {
   CircleUser,
@@ -32,6 +32,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { Spinner } from '@/components/ui/spinner';
 
 function TopMenu() {
   const { user, logout } = useAuth();
@@ -39,11 +40,12 @@ function TopMenu() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur 
     supports-[backdrop-filter]:bg-background/60 justify-between">
-      <div className="container flex h-14 max-w-screen-2xl items-center px-4">
+      <div className="container flex h-14 max-w-screen items-center px-4">
         <div className="w-[180px] hidden md:flex">
-          <a href="/" className="flex items-center space-x-2">
+          <Link to="/" className="flex items-center space-x-2">
             <span className="font-bold sm:inline-block">Col Yrself</span>
-          </a>
+          </Link>
+          
         </div>
 
         <div className="flex-1 flex justify-center">
@@ -51,18 +53,22 @@ function TopMenu() {
             <NavigationMenuList className="w-full justify-center gap-8">
               <NavigationMenuItem>
                 <NavigationMenuLink
-                  href="/dashboard"
+                  asChild
                   className={navigationMenuTriggerStyle()}
                 >
-                  Dashboard
+                  <Link to='/dashboard'>
+                    Dashboard
+                  </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
                 <NavigationMenuLink
-                  href="/calendar"
+                  asChild
                   className={navigationMenuTriggerStyle()}
                 >
-                  Calendar
+                  <Link to='/calendar'>
+                    Calendar
+                  </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
@@ -132,22 +138,33 @@ function TopMenu() {
         {!user && (
           <div className="w-[180px] flex items-center justify-end gap-2">
             <Button onClick={() => navigate({to: '/auth/login'})}>Log in</Button>
-            <Button variant="outline" onClick={() => navigate({to: '/auth/signUp'})}>Sign up</Button>
+            <Button variant="outline" onClick={() => navigate({to: '/auth/signup'})}>Sign up</Button>
           </div>
         )}
       </div>
     </header>
   );
 }
+
 export const Route = createRootRoute({
   component: RootComponent,
+  pendingComponent: () => (
+    <div className="flex min-h-screen flex-col bg-background font-sans antialiased">
+      <TopMenu />
+      <div className="flex-1 flex items-center justify-center">
+        <Spinner />
+      </div>
+    </div>
+  ),
 })
 
 function RootComponent() {
   return (
-    <>
+    <div className="flex min-h-screen flex-col bg-background font-sans antialiased">
       <TopMenu />
-      <Outlet />
-    </>
+      <div className="flex-1">
+        <Outlet />
+      </div>
+    </div>
   )
 }

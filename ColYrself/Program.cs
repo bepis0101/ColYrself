@@ -33,14 +33,9 @@ namespace ColYrself
                     };
                 });
 
-            builder.Services.AddDbContext<AccountDbContext>(options =>
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
             {
-                options.UseSqlite("DataSource=..\\ColYrself.DataProvider\\Database\\user.db");
-            });
-
-            builder.Services.AddDbContext<MeetingContext>(options =>
-            {
-                options.UseSqlite("DataSource=..\\ColYrself.DataProvider\\Database\\meetings.db");
+                options.UseSqlite("DataSource=..\\ColYrself.DataProvider\\Database\\main.db");
             });
 
             builder.Services.AddCors(options =>

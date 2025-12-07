@@ -3,7 +3,7 @@ import { useMutation } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import type { Register } from '@/types/user'
 import { toast } from 'sonner'
-export const Route = createFileRoute('/auth/signUp')({
+export const Route = createFileRoute('/auth/signup')({
   component: RouteComponent,
 })
 

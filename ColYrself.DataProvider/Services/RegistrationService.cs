@@ -13,28 +13,28 @@ namespace ColYrself.DataProvider.Services
     }
     public class RegistrationService
     {
-        private readonly AccountDbContext _context;
-        public RegistrationService(AccountDbContext context)
+        private readonly ApplicationDbContext _context;
+        public RegistrationService(ApplicationDbContext context)
         {
             _context = context;
         }
         public async Task<RegistartionStatus> AuthorizeRegistration(SignUpDetails model)
         {
-            var findUser = await _context.Users.FirstOrDefaultAsync(u => u.username == model.Username);
+            var findUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == model.Username);
             if (findUser != null) return RegistartionStatus.UserFound;
             if (model.RepeatPassword != model.Password) return RegistartionStatus.PasswordsDontMatch;
             var user_id = Guid.NewGuid();
             var user = new User()
             {
-                id = user_id,
-                email = model.Email,
-                username = model.Username
+                Id = user_id,
+                Email = model.Email,
+                Username = model.Username
             };
             await _context.Users.AddAsync(user);
             var password = new Password()
             {
-                user_id = user_id,
-                password = PasswordService.HashPassword(model.Password)
+                UserId = user_id,
+                PasswordHash = PasswordService.HashPassword(model.Password)
             };
 
             await _context.Passwords.AddAsync(password);

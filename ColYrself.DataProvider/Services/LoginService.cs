@@ -7,15 +7,15 @@ namespace ColYrself.DataProvider.Services
 {
     public class LoginService
     {
-        private readonly AccountDbContext _context;
-        public LoginService(AccountDbContext context)
+        private readonly ApplicationDbContext _context;
+        public LoginService(ApplicationDbContext context)
         {
             _context = context;
         }
 
         public async Task<UserLoginResponse> TryLogin(LoginDetails model)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.username == model.Username);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == model.Username);
             if (user == null)
             {
                 return new UserLoginResponse()
@@ -23,7 +23,7 @@ namespace ColYrself.DataProvider.Services
                     ErrorMessage = "Incorrect password or user doesn't exist",
                 };
             }
-            var password = await _context.Passwords.FirstOrDefaultAsync(p => p.user_id == user.id);
+            var password = await _context.Passwords.FirstOrDefaultAsync(p => p.UserId == user.Id);
             if(password == null)
             {
                 return new UserLoginResponse()
@@ -31,7 +31,7 @@ namespace ColYrself.DataProvider.Services
                     ErrorMessage = "Incorrect password or user doesn't exist",
                 };
             }
-            var verification = PasswordService.VerifyPassword(model.Password, password.password);
+            var verification = PasswordService.VerifyPassword(model.Password, password.PasswordHash);
             if(!verification)
             {
                 return new UserLoginResponse()
@@ -41,13 +41,17 @@ namespace ColYrself.DataProvider.Services
             }
             return new UserLoginResponse()
             {
-                UserObj = user
+                Id = user.Id.ToString(),
+                Email = user.Email,
+                Username = user.Username
             };
         }
     }
     public class UserLoginResponse
     {
-        public User? UserObj { get; set; } = null;
+        public string Id { get; set; }
+        public string Username { get; set; }
+        public string Email { get; set; }
         public string? ErrorMessage { get; set; }
     }
 }

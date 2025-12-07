@@ -23,6 +23,7 @@ export function LoginForm({
   className,
   handleGoogleLogin,
   handleNormalLogin,
+  isPending,
   ...props
 }: React.ComponentProps<"div"> & ILoginProps) {
   const [username, setUsername] = useState("");
@@ -91,8 +92,8 @@ export function LoginForm({
                   Forgot your password?
                 </a>
                 <Button type="submit" className="w-full">
-                  {props.isPending && <Spinner />}
-                  {props.isPending ? 'Loading...' : 'Login'}
+                  {isPending && <Spinner />}
+                  {isPending ? 'Loading...' : 'Login'}
                 </Button>
               </div>
               <div className="text-center text-sm">
