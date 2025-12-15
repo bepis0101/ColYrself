@@ -10,10 +10,11 @@ import { Switch } from "./ui/switch"
 import { Label } from "./ui/label"
 import DatePicker from "./date-picker"
 import { toast } from "sonner"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Badge } from "./ui/badge"
 import { X } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip"
+import type { Meeting } from "@/routes/_authenticated/dashboard"
 
 export interface IMeetingDetails {
   invited: string[]
@@ -30,9 +31,19 @@ function isPast(formVm: IMeetingDetails) {
   return dt < new Date()
 }
 
-export default function CreateEvent({ date }: { date?: Date }) {
-  const [open, setOpen] = React.useState(false)
+async function fetchMeetingDetails(meetingId: string) {
+  const res = await fetch(`${import.meta.env.VITE_API_URL}meetings/${meetingId}`, {
+    method: "GET",
+    credentials: "include",
+  });
+  if(!res.ok) {
+    throw new Error('Failed to fetch meeting details');
+  }
+  return res.json();
+}
 
+export default function CreateEvent({ date, open, setOpen, editMeetingId } : 
+  { date?: Date, open: boolean, setOpen: (open: boolean) => void, editMeetingId?: string | null }) {
   const defaultForm = React.useCallback(() => ({
     date: date ?? new Date(new Date().setHours(0, 0, 0, 0)),
     invited: [],
@@ -40,9 +51,33 @@ export default function CreateEvent({ date }: { date?: Date }) {
     name: "",
     time: ""
   }) as IMeetingDetails, [date])
-
   const [formVm, setFormVm] = React.useState<IMeetingDetails>(defaultForm())
   const [chosen, setChosen] = React.useState<User[]>([])
+  
+  const { data } = useQuery<Meeting>({
+    queryKey: ['meetingDetails', editMeetingId], 
+    enabled: !!editMeetingId,
+    queryFn: () => fetchMeetingDetails(editMeetingId ?? ""), 
+  });
+
+  React.useEffect(() => {
+    if(!editMeetingId) {
+      setFormVm(defaultForm());
+      return;
+    }
+    if(data) {
+      setFormVm({
+        name: data.name,
+        date: new Date(data.date),
+        time: data.time,
+        invited: data.invitedUsers.map(x => x.id),
+        isPrivate: data.isPrivate,
+      });
+      setChosen(data.invitedUsers);
+    }
+
+  }, [editMeetingId, data, open])
+
 
   const queryClient = useQueryClient();
 
@@ -77,7 +112,20 @@ export default function CreateEvent({ date }: { date?: Date }) {
     return {}
   }
 
-  const eventCreationMutation = useMutation({
+  async function fetchEditEvent(meetingId: string, vm: IMeetingDetails) {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}meetings/update/${meetingId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(vm),
+      credentials: "include"
+    });
+    if(!res.ok) {
+      throw new Error('Failed to edit meeting');
+    }
+    return {};
+  }
+
+  const eventCreateMutation = useMutation({
     mutationFn: (vm: IMeetingDetails) => fetchSubmitEvent(vm),
     onSuccess: () => {
       toast.success("Meeting created successfully")
@@ -89,6 +137,21 @@ export default function CreateEvent({ date }: { date?: Date }) {
       console.error("Meeting creation failed")
     }
   })
+
+  const eventEditMutation = useMutation({
+    mutationFn: (vm: IMeetingDetails) => fetchEditEvent(editMeetingId ?? "", vm),
+    onSuccess: () => {
+      toast.success("Meeting edited successfully");
+      queryClient.invalidateQueries({ queryKey: ['allActiveMeetings'] });
+      queryClient.invalidateQueries({ queryKey: ['activeMeetings'] });
+      queryClient.invalidateQueries({ queryKey: ['meetingDetails', editMeetingId] });
+      setOpen(false);
+    },
+    onError: () => {
+      console.error("Meeting edit failed");
+    }
+  });
+
 
   function handleSubmitEvent() {
     if (formVm.time === "") {
@@ -105,14 +168,15 @@ export default function CreateEvent({ date }: { date?: Date }) {
       toast.error("Invite some people if you want the meeting to be private")
       return
     }
-
-    eventCreationMutation.mutate(formVm)
+    if(editMeetingId) {
+      eventEditMutation.mutate(formVm);
+    } else {
+      eventCreateMutation.mutate(formVm);
+    }
   }
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}>Create meeting</Button>
-
       <Dialog
         open={open}
         onOpenChange={isOpen => {
@@ -128,8 +192,8 @@ export default function CreateEvent({ date }: { date?: Date }) {
           <form
             className="flex flex-col gap-3"
             onSubmit={e => {
-              e.preventDefault()
-              handleSubmitEvent()
+              e.preventDefault();
+              handleSubmitEvent();
             }}
           >
             <DialogHeader>
@@ -199,7 +263,7 @@ export default function CreateEvent({ date }: { date?: Date }) {
             </FieldGroup>
 
             <DialogFooter>
-              <Button type="submit">Add meeting</Button>
+              <Button type="submit">{editMeetingId ? "Edit meeting" : "Add meeting"}</Button>
               <DialogClose asChild>
                 <Button variant="outline" onClick={() => setOpen(false)}>
                   Cancel

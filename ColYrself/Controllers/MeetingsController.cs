@@ -3,10 +3,13 @@ using ColYrself.DataProvider.Models.Database;
 using ColYrself.DataProvider.Models.DTOs;
 using ColYrself.DataProvider.Models.Views;
 using ColYrself.DataProvider.Services;
+using ColYrself.Handlers;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace ColYrself.Controllers
 {
@@ -14,153 +17,78 @@ namespace ColYrself.Controllers
     [ApiController]
     public class MeetingsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
-        public MeetingsController(ApplicationDbContext context)
+        private readonly IMediator _mediator;
+        public MeetingsController(IMediator mediator)
         {
-            _context = context;
+            _mediator = mediator;
         }
         [Authorize]
         [HttpPost("Create")]
         public async Task<IActionResult> CreateMeeting([FromBody] MeetingDetails meeting)
         {
-            var user = UserService.GetUserWithMeetings(HttpContext, _context);
-            if(user == null)
+            var userId = UserService.GetUserId(HttpContext);
+            var result =  await _mediator.Send(new CreateMeetingParameters() { Details = meeting, UserId = userId });
+            if(result.Id == Guid.Empty)
             {
-                return Unauthorized();
+                return Forbid();
             }
-            var date = DateOnly.FromDateTime(DateTime.Parse(meeting.Date));
-            var users = meeting.Invited.Select(x => new User() { Id = Guid.Parse(x)});
-            _context.AttachRange(users);
-            var dbMeeting = new Meeting()
-            {
-                Id = Guid.NewGuid(),
-                Name = meeting.Name,
-                Date = date,
-                Time = TimeOnly.Parse(meeting.Time),
-                IsPrivate = meeting.IsPrivate,
-                OrganizerId = user.Id,
-                InvitedUsers = users.ToList(),
-                Organizer = user
-            };
-            await _context.AddAsync(dbMeeting);
-            await _context.SaveChangesAsync();
-            return Ok();
+            return Created();
         }
-        
+
         [Authorize]
         [HttpDelete("Delete/{meetingId}")]
         public async Task<IActionResult> DeleteMeeting([FromRoute] string meetingId)
         {
-            var user = UserService.GetUser(HttpContext, _context);
-            if (user == null)
-            {
-                return Unauthorized();
-            }
-            var meetingGuid = Guid.Parse(meetingId);
-            if(meetingGuid == Guid.Empty)
-            {
-                return BadRequest();
-            }
-            var meeting = await _context.Meetings.FirstOrDefaultAsync(x => x.Id == meetingGuid);
-            if (meeting == null)
-            {
-                return BadRequest();
-            }
-            if(meeting.OrganizerId != user.Id)
+            var userId = UserService.GetUserId(HttpContext);
+            var result = await _mediator.Send(new DeleteMeetingParameters() { MeetingId = meetingId, UserId = userId });
+            if (result.MeetingId == Guid.Empty)
             {
                 return Forbid();
             }
-            _context.Remove(meeting);
-            await _context.SaveChangesAsync();
-            return Ok();
-        }
-        [Authorize]
-        [HttpGet("GetAllMeetings")]
-        public IActionResult GetAllMeetings()
-        {
-            return Ok(_context.Meetings.ToArray());
+            return NoContent();
         }
 
         [Authorize]
         [HttpGet("Active")]
-        public IActionResult GetMeetingsForCurrentUser()
+        public async Task<IActionResult> GetMeetingsForCurrentUser()
         {
-            var user = UserService.GetUserWithMeetings(HttpContext, _context);
-            if(user == null)
-            {
-                return Unauthorized();
-            }
-            var invitedMeetings = user.InvitedMeetings.ToArray();
-            var organizedMeetings = user.OrganizedMeetings.ToArray();
-            var meetings = invitedMeetings
-                .Concat(organizedMeetings)
-                .Distinct()
-                .Select(m => new MeetingDto()
-                {
-                    Date = m.Date,
-                    Id = m.Id,
-                    InvitedUserIds = m.InvitedUsers.Select(u => u.Id).ToList(),
-                    IsPrivate = m.IsPrivate,
-                    Name = m.Name,
-                    OrganizerId = m.OrganizerId,
-                    Time = m.Time
-                });
-            return Ok(meetings);
+            var userId = UserService.GetUserId(HttpContext);
+            var result = await _mediator.Send(new GetMeetingsParameters() { UserId = userId });
+            return Ok(result.Meetings);
         }
         [Authorize]
-        [HttpPut("Update")]
-        public async Task<IActionResult> UpdateMeeting(string meetingId, [FromBody] MeetingDetails details)
+        [HttpPut("Update/{meetingId}")]
+        public async Task<IActionResult> UpdateMeeting([FromRoute] string meetingId, [FromBody] MeetingDetails details)
         {
             if (!Guid.TryParse(meetingId, out var id))
             {
                 return BadRequest();
             }
+            var userId = UserService.GetUserId(HttpContext);
+            var result = await _mediator.Send(new UpdateMeetingParameters() 
+            { 
+                UserId = userId, 
+                Details = details, 
+                MeetingId = id 
+            });
 
-            var user = UserService.GetUser(HttpContext, _context);
-
-            var meeting = await _context.Meetings
-                .Include(x => x.InvitedUsers)
-                .FirstOrDefaultAsync(x => x.Id == id);
-
-            if (meeting == null)
+            if(result.MeetingId  == Guid.Empty)
             {
-                return NotFound();
+                return BadRequest();
             }
-
-            if (meeting.OrganizerId != user.Id)
+            return Created();
+        }
+        [Authorize]
+        [HttpGet("{meetingId}")]
+        public async Task<IActionResult> GetMeeting([FromRoute] string meetingId)
+        {
+            var userId = UserService.GetUserId(HttpContext);
+            var result = await _mediator.Send(new GetMeetingParameters() { MeetingId = meetingId, UserId = userId });
+            if(result.Meeting == null)
             {
-                return Forbid();
+                return Unauthorized();
             }
-
-            if (DateOnly.TryParse(details.Date, out var date)) meeting.Date = date;
-            if (TimeOnly.TryParse(details.Time, out var time)) meeting.Time = time;
-            meeting.IsPrivate = details.IsPrivate;
-
-            meeting.InvitedUsers.Clear();
-
-            var newUserIds = details.Invited
-                .Select(Guid.Parse)
-                .Distinct()
-                .ToList();
-
-            foreach (var userId in newUserIds)
-            {
-                var localEntry = _context.Users.Local.FirstOrDefault(u => u.Id == userId);
-
-                if (localEntry != null)
-                {
-                    meeting.InvitedUsers.Add(localEntry);
-                }
-                else
-                {
-                    var userStub = new User { Id = userId };
-                    _context.Attach(userStub);
-                    meeting.InvitedUsers.Add(userStub);
-                }
-            }
-
-            await _context.SaveChangesAsync();
-            return Ok();
+            return Ok(result.Meeting);
         }
     }
 }

@@ -27,10 +27,12 @@ export default function UserPicker({chosen, pickUser} : IUserPickerProps) {
   const { data } = useQuery<User[]>({
     queryKey: ["users"],
     queryFn: fetchUsers,
-    select: (users) =>
-      users.filter(u => !chosen.some(c => c.id === u.id))
   });
 
+  const availableUsers = React.useMemo(() => {
+    if(!data) return [];
+    return data.filter(user => !chosen.find(c => c.id === user.id));
+  }, [data, chosen]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -50,7 +52,7 @@ export default function UserPicker({chosen, pickUser} : IUserPickerProps) {
           <CommandList>
             <CommandEmpty>No people found</CommandEmpty>
             <CommandGroup>
-              {data?.map((user) => (
+              {availableUsers.map((user) => (
                 <CommandItem
                   key={user.id}
                   value={user.username}

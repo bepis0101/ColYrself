@@ -3,13 +3,15 @@ import { Calendar } from "@/components/ui/calendar"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import CreateEvent from "./create-event"
 import type { Meeting } from "@/routes/_authenticated/dashboard"
+import { Button } from "./ui/button"
 
 
 export default function Calendar31({ meetings }: { meetings: Meeting[] }) {
   const [date, setDate] = React.useState<Date>(
     new Date()
   )
-  
+  const [open, setOpen] = React.useState(false);
+
   const filtered = React.useMemo(() => {
     return meetings.filter(x => new Date(x.date).getDate() === date.getDate())
   }, [date, meetings])
@@ -35,7 +37,8 @@ export default function Calendar31({ meetings }: { meetings: Meeting[] }) {
               year: "numeric",
             })}
           </div>
-          <CreateEvent date={date} />
+          <Button onClick={() => setOpen(true)}>Create Event</Button>
+          <CreateEvent open={open} setOpen={setOpen} date={date} />
         </div>
         <div className="flex w-full flex-col gap-2">
           {filtered.map((meeting) => (

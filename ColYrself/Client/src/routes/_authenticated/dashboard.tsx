@@ -7,6 +7,8 @@ import CreateEvent from '@/components/create-event';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import React from 'react';
+import type { User } from '@/types/user';
 
 
 export interface Meeting {
@@ -14,7 +16,7 @@ export interface Meeting {
   name: string;
   date: string;
   time: string;
-  invitedIds: string[];
+  invitedUsers: User[];
   organizerId: string;
   isPrivate: boolean;
 }
@@ -38,6 +40,9 @@ export async function fetchActiveMeetings() {
 function RouteComponent() {
   function parseMeetingTime(meeting: Meeting, now: number) {
     const time = Date.parse(meeting.date + 'T' + meeting.time);
+    if(Math.abs(time - now) < 1000 * 60) {
+      return "Starting now";
+    }
     if(time < now) {
       return `Started ${Math.floor((now - time) / (1000 * 60))} minutes ago`;
     } else {
@@ -90,6 +95,8 @@ function RouteComponent() {
     }
   });
 
+  const [open, setOpen] = React.useState(false);
+  const [editMeetingId, setEditMeetingId] = React.useState<string | null>(null);
   return (
     <>
       <div className="align-center justify-center flex flex-col">
@@ -104,7 +111,7 @@ function RouteComponent() {
               </EmptyHeader>
               <EmptyContent>
                 <div className='flex flex-row'>
-                  <CreateEvent />
+                  <Button onClick={() => { setEditMeetingId(null); setOpen(true); }}>Create Event</Button>
                 </div>
               </EmptyContent>
             </Empty>
@@ -129,7 +136,9 @@ function RouteComponent() {
                             Join Meeting
                           </Link>
                           <Button variant="outline" className="w-8 h-8 flex justify-center 
-                          p-1 border-1 border-gray-500 rounded-md hover:bg-secondary/50">
+                            p-1 border-1 border-gray-500 rounded-md hover:bg-secondary/50"
+                            onClick={() => {setOpen(true); setEditMeetingId(meeting.id);}}
+                          >
                             <PenIcon />
                           </Button>
                           <AlertDialog>
@@ -168,6 +177,11 @@ function RouteComponent() {
           )
         }
       </div>
+      <CreateEvent
+        open={open} 
+        setOpen={setOpen} 
+        editMeetingId={editMeetingId} 
+      />
     </>
 
   )

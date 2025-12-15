@@ -1,12 +1,12 @@
-﻿using ColYrself.DataProvider.Contexts;
-using ColYrself.DataProvider.Models.Views;
+﻿using ColYrself.DataProvider.Models.Views;
 using ColYrself.DataProvider.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using MediatR;
+using ColYrself.Handlers;
+using System.Threading.Tasks;
 
 namespace ColYrself.Controllers
 {
@@ -14,47 +14,40 @@ namespace ColYrself.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
-        public AccountController(ApplicationDbContext context)
+        private readonly IMediator _mediator;
+        public AccountController(IMediator mediator)
         {
-            _context = context;
+            _mediator = mediator;
         }
         [Authorize]
         [HttpGet("Users")]
         public async Task<IActionResult> GetUsers()
         {
-            var userId = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if(String.IsNullOrEmpty(userId))
-            {
-                return Unauthorized();
-            }
-            var users = await _context.Users.Where(x => x.Id != Guid.Parse(userId)).ToListAsync();
-            return Ok(users);
+            var userId = UserService.GetUserId(HttpContext);
+            var result = await _mediator.Send(new GetUsersParameters() { UserId = userId });
+            return Ok(result.Users);
         }
         [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] LoginDetails user)
         {
-            var service = new LoginService(_context);
-            var response = await service.TryLogin(user);
-            if (response == null || response.Id == null) return Unauthorized(response?.ErrorMessage);
-            var claims = ClaimGen.GeneratePrincipal(response);
+            var result = await _mediator.Send(new LoginParameters() { Details = user });
+            if (result == null) return BadRequest();
             await HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme, 
-                claims,
+                result.ClaimsPrincipal,
                 new AuthenticationProperties
                 {
                     IsPersistent = true,
                     ExpiresUtc = DateTime.UtcNow.AddDays(7),
                 }
             );
-            return Ok(response);
+            return Ok(result.UserLoginResponse);
         }
         [HttpPost("SignUp")]
         public async Task<IActionResult> SignUp([FromBody] SignUpDetails user)
         {
-            var registration = new RegistrationService(_context);
-            var response = await registration.AuthorizeRegistration(user);
-            switch (response)
+            var result = await _mediator.Send(new SignupParameters() { SignUpDetails = user });
+            switch (result.Status)
             {
                 case RegistartionStatus.Success:
                     return Ok();
@@ -74,10 +67,15 @@ namespace ColYrself.Controllers
         }
         [Authorize]
         [HttpGet("Me")]
-        public IActionResult GetCurrent()
+        public async Task<IActionResult> GetCurrent()
         {        
-            var user = UserService.GetUser(HttpContext, _context);
-            return Ok(user);
+            var userId = UserService.GetUserId(HttpContext);
+            var result = await _mediator.Send(new GetUserParameters() { UserId = userId });
+            if(result.User == null)
+            {
+                return NotFound();
+            }
+            return Ok(result.User);
         }
     }
 }

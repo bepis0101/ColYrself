@@ -14,6 +14,6 @@ namespace ColYrself.DataProvider.Models.DTOs
         public TimeOnly Time { get; set; }
         public bool IsPrivate { get; set; }
         public Guid OrganizerId { get; set; }
-        public List<Guid> InvitedUserIds { get; set; } = new List<Guid>();
+        public List<UserDto> InvitedUsers { get; set; } = [];
     }
 }
