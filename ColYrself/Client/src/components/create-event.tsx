@@ -194,6 +194,8 @@ export default function CreateEvent({ date, open, setOpen, editMeetingId } :
             onSubmit={e => {
               e.preventDefault();
               handleSubmitEvent();
+              setChosen([]);
+              setFormVm(defaultForm());
             }}
           >
             <DialogHeader>

@@ -14,6 +14,10 @@ namespace ColYrself.DataProvider.Services
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
             };
+            if(user.Username == "admin")
+            {
+                claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+            }
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);
             return principal;

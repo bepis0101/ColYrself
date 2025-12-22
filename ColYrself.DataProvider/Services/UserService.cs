@@ -20,6 +20,10 @@ namespace ColYrself.DataProvider.Services
             var id = Guid.Parse(idValue);
             return id;
         }
+        public static bool IsAdmin(HttpContext httpContext)
+        {
+            return httpContext.User.IsInRole("Admin");
+        }
         public static User? GetUser(ApplicationDbContext userContext, Guid userId)
         {
             var user = userContext.Users.FirstOrDefault(x => x.Id == userId);

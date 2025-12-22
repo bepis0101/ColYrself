@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using MediatR;
 using ColYrself.Handlers;
-using System.Threading.Tasks;
 
 namespace ColYrself.Controllers
 {
@@ -70,7 +69,8 @@ namespace ColYrself.Controllers
         public async Task<IActionResult> GetCurrent()
         {        
             var userId = UserService.GetUserId(HttpContext);
-            var result = await _mediator.Send(new GetUserParameters() { UserId = userId });
+            var isAdmin = UserService.IsAdmin(HttpContext);
+            var result = await _mediator.Send(new GetUserParameters() { UserId = userId, IsAdmin = isAdmin});
             if(result.User == null)
             {
                 return NotFound();

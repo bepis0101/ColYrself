@@ -8,6 +8,7 @@ namespace ColYrself.Handlers
     public class GetUserParameters : IRequest<GetUserResult>
     {
         public Guid UserId { get; set; }
+        public bool IsAdmin { get; set; }
     }
     public class GetUserResult
     {
@@ -33,7 +34,8 @@ namespace ColYrself.Handlers
                 {
                     Id = user.Id.ToString(),
                     Email = user.Email,
-                    Username = user.Username
+                    Username = user.Username,
+                    IsAdmin = parameters.IsAdmin
                 }
             };
         }

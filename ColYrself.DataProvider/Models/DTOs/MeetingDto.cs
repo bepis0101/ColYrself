@@ -15,5 +15,6 @@ namespace ColYrself.DataProvider.Models.DTOs
         public bool IsPrivate { get; set; }
         public Guid OrganizerId { get; set; }
         public List<UserDto> InvitedUsers { get; set; } = [];
+        public UserDto? Organizer { get; set; }
     }
 }

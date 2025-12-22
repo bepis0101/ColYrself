@@ -90,5 +90,16 @@ namespace ColYrself.Controllers
             }
             return Ok(result.Meeting);
         }
+        [Authorize(Roles = "Admin")]
+        [HttpGet("/")]
+        public async Task<IActionResult> GetMeetings()
+        {
+            var userId = UserService.GetUserId(HttpContext);
+            var result = await _mediator.Send(new GetAllMeetingsParameters()
+            {
+                UserId = userId
+            });
+            return Ok(result.Meetings);
+        }
     }
 }

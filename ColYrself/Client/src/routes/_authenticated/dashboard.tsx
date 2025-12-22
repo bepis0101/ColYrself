@@ -82,8 +82,11 @@ function RouteComponent() {
   }
 
   const queryClient = useQueryClient();
+  const [open, setOpen] = React.useState(false);
+  const [editMeetingId, setEditMeetingId] = React.useState<string | null>(null);
 
   const deleteMutation = useMutation({ 
+    mutationKey: ['deleteMeeting', editMeetingId],
     mutationFn: (meetingId: string) => fetchDeleteMeeting(meetingId),
     onSuccess: () => {
       toast.success("Meeting deleted successfully");
@@ -95,8 +98,6 @@ function RouteComponent() {
     }
   });
 
-  const [open, setOpen] = React.useState(false);
-  const [editMeetingId, setEditMeetingId] = React.useState<string | null>(null);
   return (
     <>
       <div className="align-center justify-center flex flex-col">
