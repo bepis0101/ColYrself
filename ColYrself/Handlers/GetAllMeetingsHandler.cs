@@ -49,6 +49,7 @@ namespace ColYrself.Handlers
                         })
                         .ToList()
                 })
+                .OrderByDescending(x => x.Date)
                 .ToListAsync(token);
             return new GetAllMeetingsResult() { Meetings = meetings };
         }

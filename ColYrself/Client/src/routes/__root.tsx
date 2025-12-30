@@ -5,6 +5,9 @@ import {
   ExternalLink,
   LogOut,
   Settings,
+  ShieldCheck,
+  TvMinimalPlayIcon,
+  User,
 } from "lucide-react";
 
 import {
@@ -24,6 +27,7 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -118,16 +122,38 @@ function TopMenu() {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                {user.isAdmin && (
+                  <DropdownMenuGroup>
+                    <DropdownMenuLabel className="flex items-center px-2 py-1.5">
+                      <ShieldCheck className="mr-2 h-4 w-4" />
+                      <span>Admin panel</span>
+                    </DropdownMenuLabel>
+                    
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin/users" className="cursor-pointer ml-4">
+                        <User className="mr-2 h-4 w-4" />
+                        Users
+                      </Link>
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin/meetings" className="cursor-pointer ml-4">
+                        <TvMinimalPlayIcon className="mr-2 h-4 w-4" />
+                        Meetings
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                )}
+                <DropdownMenuItem className='cursor-pointer'>
                   <CircleUser className="mr-2 h-4 w-4" />
                   <span>Profile</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem className='cursor-pointer'>
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Settings</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => logout()}>
+                <DropdownMenuItem className='cursor-pointer' onClick={() => logout()}>
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
                 </DropdownMenuItem>

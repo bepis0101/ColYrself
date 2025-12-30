@@ -111,7 +111,7 @@ export default function Calendar31({ meetings }: { meetings: Meeting[] }) {
                           Are you sure you want to delete this meeting?
                         </AlertDialogTitle>
                         <AlertDialogDescription>
-                          This acction cannot be undone.
+                          This action cannot be undone.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>

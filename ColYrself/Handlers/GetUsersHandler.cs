@@ -30,6 +30,7 @@ namespace ColYrself.Handlers
                     Id = x.Id.ToString().ToLower(),
                     Username = x.Username
                 })
+                .OrderBy(x => x.Username)
                 .ToListAsync(token);
 
             return new GetUsersResult() { Users = users };

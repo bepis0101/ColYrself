@@ -48,7 +48,8 @@ namespace ColYrself.Handlers
                     Name = m.Name,
                     OrganizerId = m.OrganizerId,
                     Time = m.Time
-                });
+                })
+                .OrderByDescending(x => x.Date);
             return new GetMeetingsResult() { Meetings = meetings.ToList() };
         }
     }

@@ -91,7 +91,7 @@ namespace ColYrself.Controllers
             return Ok(result.Meeting);
         }
         [Authorize(Roles = "Admin")]
-        [HttpGet("/")]
+        [HttpGet("")]
         public async Task<IActionResult> GetMeetings()
         {
             var userId = UserService.GetUserId(HttpContext);
