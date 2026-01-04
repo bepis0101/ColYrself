@@ -3,7 +3,7 @@ using ColYrself.DataProvider.Models.DTOs;
 using ColYrself.DataProvider.Services;
 using MediatR;
 
-namespace ColYrself.Handlers
+namespace ColYrself.DataProvider.Handlers
 {
     public class GetUserParameters : IRequest<GetUserResult>
     {

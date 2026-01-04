@@ -2,11 +2,10 @@
 using ColYrself.DataProvider.Models.Database;
 using ColYrself.DataProvider.Models.Views;
 using MediatR;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 
-namespace ColYrself.Handlers
+namespace ColYrself.DataProvider.Handlers
 {
     public class UpdateMeetingParameters : IRequest<UpdateMeetingResult>
     {

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using MediatR;
-using ColYrself.Handlers;
+using ColYrself.DataProvider.Handlers;
 
 namespace ColYrself.Controllers
 {

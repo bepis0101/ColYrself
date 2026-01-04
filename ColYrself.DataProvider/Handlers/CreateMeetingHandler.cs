@@ -4,7 +4,7 @@ using ColYrself.DataProvider.Models.Views;
 using ColYrself.DataProvider.Services;
 using MediatR;
 
-namespace ColYrself.Handlers
+namespace ColYrself.DataProvider.Handlers
 {
     public class CreateMeetingParameters : IRequest<CreateMeetingResult>
     {

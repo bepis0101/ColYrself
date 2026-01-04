@@ -10,6 +10,12 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 
+function convertDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 
 export default function Calendar31({ meetings }: { meetings: Meeting[] }) {
   const [date, setDate] = React.useState<Date>(
@@ -19,7 +25,7 @@ export default function Calendar31({ meetings }: { meetings: Meeting[] }) {
   const [editMeetingId, setEditMeetingId] = React.useState<string | null>(null);
 
   const filtered = React.useMemo(() => {
-    return meetings.filter(x => new Date(x.date).getDate() === date.getDate())
+    return meetings.filter(x => x.date === convertDate(date))
   }, [date, meetings]);
   
   const queryClient = useQueryClient();
@@ -56,6 +62,7 @@ export default function Calendar31({ meetings }: { meetings: Meeting[] }) {
       <Card className="py-4 w-full flex gap-12 flex-col">
         <CardContent className="px-4 flex flex-row justify-center w-full">
           <Calendar
+            weekStartsOn={1}
             mode="single"
             selected={date}
             onSelect={(newDate) => setDate(newDate)}
@@ -89,9 +96,12 @@ export default function Calendar31({ meetings }: { meetings: Meeting[] }) {
                   <div className="font-small">{meeting.time.slice(0, 5)}</div>
                 </div>
                 <div className="flex flex-row justify-end space-x-2 items-center">
-                  <Link to={`/dashboard`} className="text-blue-600 hover:underline mr-9">
+                  {meeting.date == convertDate(date) && <Link 
+                    className="text-blue-600 hover:underline"
+                    to={`/meeting/$meetingId`}
+                    params={{ meetingId: meeting.id }}>
                     Join Meeting
-                  </Link>
+                  </Link>}
                   <Button variant="outline" className="w-8 h-8 flex justify-center
                     p-1 border-1 border-gray-500 rounded-md hover:bg-secondary/50"
                     onClick={() => {setOpen(true); setEditMeetingId(meeting.id);}}

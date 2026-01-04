@@ -3,7 +3,7 @@ using ColYrself.DataProvider.Models.DTOs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace ColYrself.Handlers
+namespace ColYrself.DataProvider.Handlers
 {
     public class GetAllMeetingsParameters : IRequest<GetAllMeetingsResult>
     {

@@ -133,7 +133,10 @@ function RouteComponent() {
                       <TableCell>{parseMeetingTime(meeting, Date.now())}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex flex-row justify-end space-x-2 items-center">
-                          <Link to={`/dashboard`} className="text-blue-600 hover:underline mr-9">
+                          <Link 
+                            to={`/meeting/$meetingId`}
+                            params={{ meetingId: meeting.id }}
+                            className="text-blue-600 hover:underline mr-9">
                             Join Meeting
                           </Link>
                           <Button variant="outline" className="w-8 h-8 flex justify-center 

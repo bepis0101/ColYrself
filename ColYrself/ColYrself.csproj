@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ColYrself.DataProvider\ColYrself.DataProvider.csproj" />
+    <ProjectReference Include="..\ColYrself.MeetingService\ColYrself.MeetingService.csproj" />
   </ItemGroup>
 
 </Project>

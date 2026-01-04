@@ -1,10 +1,9 @@
 ﻿using ColYrself.DataProvider.Contexts;
-using ColYrself.DataProvider.Models.Database;
 using ColYrself.DataProvider.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace ColYrself.Handlers
+namespace ColYrself.DataProvider.Handlers
 {
     public class DeleteMeetingParameters : IRequest<DeleteMeetingResult>
     {

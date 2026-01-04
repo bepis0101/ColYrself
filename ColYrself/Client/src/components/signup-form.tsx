@@ -18,6 +18,8 @@ import { Input } from "@/components/ui/input"
 
 import { useState } from "react";
 import { Spinner } from "./ui/spinner"
+import { Link } from "@tanstack/react-router"
+import { EyeOff, Eye } from "lucide-react"
 
 export interface ISignupProps {
   handleSignUp: (email: string, username: string, password: string, repeatPassword: string) => void;
@@ -35,6 +37,8 @@ export function SignupForm({
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showRepeatPassword, setShowRepeatPassword] = useState(false);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -61,6 +65,7 @@ export function SignupForm({
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   required 
+                  autoComplete="username"
                 />
               </Field>
               <Field>
@@ -72,31 +77,66 @@ export function SignupForm({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  autoComplete="email"
                 />
               </Field>
               <Field>
                 <Field className="grid grid-cols-2 gap-4">
                   <Field>
                     <FieldLabel htmlFor="password">Password</FieldLabel>
-                    <Input 
-                      id="password" 
-                      type="password" 
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required 
-                    />
+                    <div className="relative">
+                      <Input 
+                        id="password" 
+                        type={showPassword ? "text" : "password"} 
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required 
+                        autoComplete="new-password"
+                      />
+                      {password.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(prev => !prev)}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                          tabIndex={-1}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </button>
+                      )}
+                    </div>
                   </Field>
                   <Field>
                     <FieldLabel htmlFor="confirm-password">
                       Confirm Password
                     </FieldLabel>
-                    <Input 
-                      id="confirm-password" 
-                      type="password" 
-                      value={repeatPassword}
-                      onChange={(e) => setRepeatPassword(e.target.value)}
-                      required 
-                      />
+                    <div className="relative">
+                      <Input
+                        id="confirm-password"
+                        type={showRepeatPassword ? "text" : "password"}
+                        value={repeatPassword}
+                        onChange={(e) => setRepeatPassword(e.target.value)}
+                        required
+                        autoComplete="new-password"
+                        />
+                      {repeatPassword.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setShowRepeatPassword(prev => !prev)}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                          tabIndex={-1}
+                        >
+                          {showRepeatPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </button>
+                      )}
+                    </div>
                   </Field>
                 </Field>
                 <FieldDescription>
@@ -109,7 +149,7 @@ export function SignupForm({
                   {props.isPending ? 'Loading...' : 'Create Account'}
                 </Button>
                 <FieldDescription className="text-center">
-                  Already have an account? <a href="login">Sign in</a>
+                  Already have an account? <Link to="/auth/login">Sign in</Link>
                 </FieldDescription>
               </Field>
             <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">

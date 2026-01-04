@@ -1,15 +1,9 @@
-﻿using ColYrself.DataProvider.Contexts;
-using ColYrself.DataProvider.Models.Database;
-using ColYrself.DataProvider.Models.DTOs;
-using ColYrself.DataProvider.Models.Views;
+﻿using ColYrself.DataProvider.Models.Views;
 using ColYrself.DataProvider.Services;
-using ColYrself.Handlers;
+using ColYrself.DataProvider.Handlers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
 
 namespace ColYrself.Controllers
 {

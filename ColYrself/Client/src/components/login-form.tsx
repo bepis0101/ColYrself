@@ -12,6 +12,9 @@ import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
 import { useState } from "react";
 import type { MouseEventHandler } from "react";
+import { Eye, EyeOff } from "lucide-react"
+import { Link } from "@tanstack/react-router"
+import { FieldDescription } from "./ui/field"
 
 export interface ILoginProps {
   handleGoogleLogin?: MouseEventHandler;
@@ -28,6 +31,7 @@ export function LoginForm({
 }: React.ComponentProps<"div"> & ILoginProps) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,33 +55,48 @@ export function LoginForm({
                     id="username" 
                     type="text"
                     required
+                    autoComplete="username"
                     value={username}
                     onChange={e => setUsername(e.target.value)}
                   />
                 </div>
                 <div className="grid gap-3">
-                  <div className="flex items-center">
-                    <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      autoComplete="current-password"
+                      required
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      className="pr-10"
+                    />
+                    {password.length > 0 && (<button
+                      type="button"
+                      onClick={() => setShowPassword(prev => !prev)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      tabIndex={-1}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>)}
                   </div>
-                  <Input
-                    id="password"
-                    type="password"
-                    required
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                  />
                 </div>
                 <Button type="submit" className="w-full" disabled={isPending}>
                   {isPending && <Spinner />}
                   {isPending ? 'Loading...' : 'Login'}
                 </Button>
               </div>
-              <div className="text-center text-sm">
-                Don&apos;t have an account?{" "}
-                <a href="signup" className="underline underline-offset-4">
-                  Sign up
-                </a>
-              </div>
+              <FieldDescription className="text-center">
+                
+                  Don&apos;t have an account?{" "}
+                  <Link to="/auth/signup">Sign up</Link>
+                
+              </FieldDescription>
             </div>
           </form>
           <div className="mt-6 flex flex-col gap-4">

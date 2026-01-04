@@ -1,11 +1,10 @@
 ﻿using ColYrself.DataProvider.Contexts;
-using ColYrself.DataProvider.Models.Database;
 using ColYrself.DataProvider.Models.Views;
 using ColYrself.DataProvider.Services;
 using MediatR;
 using System.Security.Claims;
 
-namespace ColYrself.Handlers
+namespace ColYrself.DataProvider.Handlers
 {
     public class LoginParameters : IRequest<LoginResult>
     {

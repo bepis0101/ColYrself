@@ -1,4 +1,6 @@
+using ColYrself.DataProvider;
 using ColYrself.DataProvider.Contexts;
+using ColYrself.MeetingService;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
@@ -52,7 +54,7 @@ namespace ColYrself
 
             builder.Services.AddSignalR();
 
-            builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+            builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Main).Assembly));
 
             var app = builder.Build();
             
@@ -69,6 +71,8 @@ namespace ColYrself
             app.UseAuthorization();
 
             app.MapControllers();
+
+            app.MapHub<MeetingHub>("/meeting-hub");
 
             app.Run();
         }

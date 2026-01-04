@@ -16,6 +16,7 @@ import { Route as AuthSignupRouteImport } from './routes/auth/signup'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedCalendarRouteImport } from './routes/_authenticated/calendar'
+import { Route as AuthenticatedMeetingMeetingIdRouteImport } from './routes/_authenticated/meeting/$meetingId'
 import { Route as AdminAdminUsersRouteImport } from './routes/_admin/admin/users'
 import { Route as AdminAdminMeetingsRouteImport } from './routes/_admin/admin/meetings'
 
@@ -52,6 +53,12 @@ const AuthenticatedCalendarRoute = AuthenticatedCalendarRouteImport.update({
   path: '/calendar',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedMeetingMeetingIdRoute =
+  AuthenticatedMeetingMeetingIdRouteImport.update({
+    id: '/meeting/$meetingId',
+    path: '/meeting/$meetingId',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AdminAdminUsersRoute = AdminAdminUsersRouteImport.update({
   id: '/admin/users',
   path: '/admin/users',
@@ -71,6 +78,7 @@ export interface FileRoutesByFullPath {
   '/auth/signup': typeof AuthSignupRoute
   '/admin/meetings': typeof AdminAdminMeetingsRoute
   '/admin/users': typeof AdminAdminUsersRoute
+  '/meeting/$meetingId': typeof AuthenticatedMeetingMeetingIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -80,6 +88,7 @@ export interface FileRoutesByTo {
   '/auth/signup': typeof AuthSignupRoute
   '/admin/meetings': typeof AdminAdminMeetingsRoute
   '/admin/users': typeof AdminAdminUsersRoute
+  '/meeting/$meetingId': typeof AuthenticatedMeetingMeetingIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -92,6 +101,7 @@ export interface FileRoutesById {
   '/auth/signup': typeof AuthSignupRoute
   '/_admin/admin/meetings': typeof AdminAdminMeetingsRoute
   '/_admin/admin/users': typeof AdminAdminUsersRoute
+  '/_authenticated/meeting/$meetingId': typeof AuthenticatedMeetingMeetingIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -103,6 +113,7 @@ export interface FileRouteTypes {
     | '/auth/signup'
     | '/admin/meetings'
     | '/admin/users'
+    | '/meeting/$meetingId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -112,6 +123,7 @@ export interface FileRouteTypes {
     | '/auth/signup'
     | '/admin/meetings'
     | '/admin/users'
+    | '/meeting/$meetingId'
   id:
     | '__root__'
     | '/'
@@ -123,6 +135,7 @@ export interface FileRouteTypes {
     | '/auth/signup'
     | '/_admin/admin/meetings'
     | '/_admin/admin/users'
+    | '/_authenticated/meeting/$meetingId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -184,6 +197,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCalendarRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/meeting/$meetingId': {
+      id: '/_authenticated/meeting/$meetingId'
+      path: '/meeting/$meetingId'
+      fullPath: '/meeting/$meetingId'
+      preLoaderRoute: typeof AuthenticatedMeetingMeetingIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_admin/admin/users': {
       id: '/_admin/admin/users'
       path: '/admin/users'
@@ -216,11 +236,13 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 interface AuthenticatedRouteChildren {
   AuthenticatedCalendarRoute: typeof AuthenticatedCalendarRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedMeetingMeetingIdRoute: typeof AuthenticatedMeetingMeetingIdRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedCalendarRoute: AuthenticatedCalendarRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedMeetingMeetingIdRoute: AuthenticatedMeetingMeetingIdRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(

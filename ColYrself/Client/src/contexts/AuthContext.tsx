@@ -4,7 +4,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const VITE_API_URL = import.meta.env.VITE_API_URL;
 
 export interface AuthContextType {
   user: User | null;
@@ -21,7 +21,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { data, isLoading } = useQuery({
     queryKey: ["me"],
     queryFn: async () => {
-      const res = await fetch(`${API_URL}account/me`, {
+      const res = await fetch(`${VITE_API_URL}account/me`, {
         method: "GET",
         credentials: "include",
       });
@@ -34,7 +34,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logoutMutation = useMutation({
     mutationKey: ["logout"],
     mutationFn: async () => {
-      const res = await fetch(`${API_URL}account/logout`, {
+      const res = await fetch(`${VITE_API_URL}account/logout`, {
         method: "POST",
         credentials: "include",
       });
