@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 using ColYrself.DataProvider.Handlers;
 using Microsoft.AspNetCore.Authorization;
+using ColYrself.DataProvider.Models.DTOs;
 
 namespace ColYrself.MeetingService
 {
@@ -14,43 +15,45 @@ namespace ColYrself.MeetingService
         {
             _mediator = mediator;
         }
+        private async Task<UserDto> GetCurrentUser()
+        {
+            var userId = Context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var isAdmin = Context.User.IsInRole("Admin");
+            var id = Guid.Parse(userId);
+            var user = await _mediator.Send(new GetUserParameters() { UserId = id, IsAdmin = isAdmin });
+            return user.User;
+        }
+
         public async Task JoinMeeting(string meetingId)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, meetingId);
-            var userId = Context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var isAdmin = Context.User.IsInRole("Admin");
-            var id = Guid.Parse(userId);
-            var user = await _mediator.Send(new GetUserParameters() { UserId = id, IsAdmin = isAdmin });
-            if(user == null)
-            {
-                return;
-            }
-            await Clients.OthersInGroup(meetingId).SendAsync("UserJoined", user.User);
-        }
-        public async Task SendOffer(string meetingId, string offer)
-        {
-            await Clients.OthersInGroup(meetingId).SendAsync("ReceiveOffer", Context.ConnectionId, offer);
-        }
-        public async Task SendAnswer(string meetingId, string answer)
-        {
-            await Clients.OthersInGroup(meetingId).SendAsync("ReceiveAnswer", Context.ConnectionId, answer);
-        }
-        public async Task SendIceCandidate(string meetingId, string candidate)
-        {
-            await Clients.OthersInGroup(meetingId).SendAsync("ReceiveIceCandidate", Context.ConnectionId, candidate);
-        }
-        public async Task LeaveMeeting(string meetingId)
-        {
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, meetingId);
-            var userId = Context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var isAdmin = Context.User.IsInRole("Admin");
-            var id = Guid.Parse(userId);
-            var user = await _mediator.Send(new GetUserParameters() { UserId = id, IsAdmin = isAdmin });
+            var user = await GetCurrentUser();
             if (user == null)
             {
                 return;
             }
-            await Clients.OthersInGroup(meetingId).SendAsync("UserLeft", user.User);
+            await Clients.OthersInGroup(meetingId).SendAsync("UserJoined", user, Context.ConnectionId);
+        }
+        public async Task SendOffer(string targetId, string offer)
+        {
+            var user = await GetCurrentUser();
+            await Clients.Client(targetId).SendAsync("ReceiveOffer", user, offer, targetId);
+        }
+        public async Task SendAnswer(string targetId, string answer)
+        {
+            var user = await GetCurrentUser();
+            await Clients.Client(targetId).SendAsync("ReceiveAnswer", user, answer, targetId);
+        }
+        public async Task SendIceCandidate(string targetId, string candidate)
+        {
+            var user = await GetCurrentUser();
+            await Clients.Client(targetId).SendAsync("ReceiveIceCandidate", user, candidate, targetId);
+        }
+        public async Task LeaveMeeting(string meetingId)
+        {
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, meetingId);
+            var user = await GetCurrentUser();
+            await Clients.OthersInGroup(meetingId).SendAsync("UserLeft", user, Context.ConnectionId);
         }
     }
 }

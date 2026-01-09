@@ -5,6 +5,7 @@ import type { User } from '@/types/user';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import VideoBox from '@/components/video-box';
+import RemoteVideo from '@/components/remote-video';
 
 export const Route = createFileRoute('/_authenticated/meeting/$meetingId')({
   component: RouteComponent,
@@ -13,114 +14,125 @@ export const Route = createFileRoute('/_authenticated/meeting/$meetingId')({
 function RouteComponent() {
   const { meetingId } = Route.useParams();
 
-  const peerConnection = useRef<RTCPeerConnection | null>(null);
-  const hubConnection = useRef<SignalR.HubConnection | null>(null);
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
-  const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
+  const hubConnection = useRef<SignalR.HubConnection | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
+  const peerConnection = useRef<Record<string, RTCPeerConnection>>({});
   const pcConfig: RTCConfiguration = {
     iceServers: [{ urls: 'stun:stun.l.google.com:19302'}]
   }
-
+  
+  const [remoteStreams, setRemoteStreams] = useState<{connectionId: string, user: User, stream: MediaStream }[]>([]);
   const [isJoined, setIsJoined] = useState(false);
 
-  function setupSignalRHandlers() {
-    const connection = hubConnection.current;
-    if(!connection) return;
-    connection.on("UserJoined", async (user: User) => {
-      await createOffer();
-      toast.success(`${user.username} joined the meeting`);
+  const closePeerConnection = (connectionId: string) => {
+    setRemoteStreams(prev => {
+      const remote = prev.find(x => x.connectionId === connectionId);
+      remote?.stream.getTracks().forEach(t => t.stop());
+      return prev.filter(x => x.connectionId !== connectionId);
     });
 
-    connection.on("ReceiveOffer", async (userId: string, offer: string) => {
-      console.log("Received offer from ", userId);
-      await handleOffer(offer);
-    });
+    peerConnection.current[connectionId]?.close();
+    delete peerConnection.current[connectionId];
+  };
 
-    connection.on("ReceiveAnswer", async (userId: string, answer: string) => {
-      console.log("Received answer from ", userId);
-      await peerConnection.current?.setRemoteDescription(new RTCSessionDescription(JSON.parse(answer)));
-    });
 
-    connection.on("ReceiveIceCandidate", async (userId: string, candidate: string) => {
-      console.log("Received ICE candidate from ", userId);
-      await peerConnection.current?.addIceCandidate(new RTCIceCandidate(JSON.parse(candidate)));
-    });
-  }
+  const getPeerConnection = async (user: User, connectionId: string) => {
+    if(peerConnection.current[connectionId]) {
+      return peerConnection.current[connectionId];
+    }
 
-  async function createOffer() {
-    if(!peerConnection.current || !hubConnection.current) return;
-    const offer = await peerConnection.current.createOffer();
-    await peerConnection.current.setLocalDescription(offer);
-    await hubConnection.current.invoke("SendOffer", meetingId, JSON.stringify(offer));
-  }
+    const pc = new RTCPeerConnection(pcConfig);
+    
+    localStreamRef.current?.getTracks().forEach(t => {
+      pc.addTrack(t, localStreamRef.current!);
+    })
 
-  async function handleOffer(offer: string) {
-    if(!peerConnection.current || !hubConnection.current) return;
-    await peerConnection
-      .current
-      .setRemoteDescription(
-        new RTCSessionDescription(
-          JSON.parse(offer)
-        )
-      );
-    const answer = await peerConnection.current.createAnswer();
-    await peerConnection.current.setLocalDescription(answer);
-    await hubConnection.current.invoke("SendAnswer", meetingId, JSON.stringify(answer))
+    pc.onicecandidate = (e => {
+      if(e.candidate && hubConnection.current) {
+        hubConnection.current.invoke("SendIceCandidate", connectionId, JSON.stringify(e.candidate));
+      }
+    })
+
+    pc.ontrack = (e => {
+      console.log(e.streams[0].getTracks())
+      const newStream = e.streams[0];
+      setRemoteStreams(prev => {
+        if(prev.some(x => x.connectionId === connectionId)) return prev;
+        return [...prev, { connectionId, user, stream: newStream }];
+      });
+    })
+
+    peerConnection.current[connectionId] = pc;
+
+    console.log("Peer connection established with ", user.username)
+
+    return pc;
   }
 
   useEffect(() => {
+    if(!isJoined) return;
     hubConnection.current = new SignalR.HubConnectionBuilder()
       .withUrl(import.meta.env.VITE_SIGNALR_HUB)
       .withAutomaticReconnect()
       .build();
     
-    setupSignalRHandlers();
+    const connection = hubConnection.current;
+    if(!connection) return;
 
-    hubConnection.current.start()
+    connection.on("UserJoined", async (user: User, connectionId: string) => {
+      toast.success(`${user.username} joined the meeting`);
+      const pc = await getPeerConnection(user, connectionId);
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      await connection.invoke("SendOffer", connectionId, JSON.stringify(offer));
+    });
+
+    connection.on("ReceiveOffer", async (user: User, offer: string, connectionId: string) => {
+      console.log("Received offer from", user.username)
+      const pc = await getPeerConnection(user, connectionId);
+      await pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(offer)));
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+      await connection.invoke("SendAnswer", connectionId, JSON.stringify(answer))
+    });
+
+    connection.on("ReceiveAnswer", async (user: User, answer: string, connectionId: string) => {
+      console.log("Received answer from ", user.username);
+      const pc = peerConnection.current[connectionId];
+      await pc?.setRemoteDescription(new RTCSessionDescription(JSON.parse(answer)));
+    });
+
+    connection.on("ReceiveIceCandidate", async (user: User, candidate: string, connectionId: string) => {
+      console.log("Received ICE candidate from ", user.username);
+      const pc = peerConnection.current[connectionId];
+      await pc?.addIceCandidate(new RTCIceCandidate(JSON.parse(candidate)));
+    });
+
+    connection.on("UserLeft", async (user: User, connectionId: string) => {
+      toast.info(`${user.username} left the meeting`);
+      closePeerConnection(connectionId);
+    })
+
+    connection.start()
       .then(() => console.log("SignalR Connected"))
       .catch((err) => console.error("SignalR Connection Error: ", err));
     
       return () => {
-        if (localStreamRef.current) {
-          localStreamRef.current.getTracks().forEach(track => track.stop());
-        }
-        peerConnection.current?.close();
-        hubConnection.current?.stop();
-      }
+        connection.stop();
+      };
 
-  }, []);
+  }, [isJoined]);
 
   async function startVideo() {
     try {
+      setIsJoined(true);
       const stream = await navigator.mediaDevices.getUserMedia(({ video: true, audio: true }));
       localStreamRef.current = stream;
-      if(localVideoRef.current) {
-        localVideoRef.current.srcObject = stream;
-      }
-      peerConnection.current = new RTCPeerConnection(pcConfig);
-      stream.getTracks().forEach(t => {
-        if(peerConnection.current && stream) {
-          peerConnection.current.addTrack(t, stream);
-        }
-      });
-      // TODO Handle more streams
-      peerConnection.current.ontrack = (e: RTCTrackEvent) => {
-        if(remoteVideoRef.current && e.streams[0]) {
-          remoteVideoRef.current.srcObject = e.streams[0];
-        }
-      }
-
-      peerConnection.current.onicecandidate = (e: RTCPeerConnectionIceEvent) => {
-        if(e.candidate && hubConnection.current) {
-          hubConnection.current.invoke("SendIceCandidate", meetingId, JSON.stringify(e.candidate));
-        }
-      }
-      
+      if(localVideoRef.current) localVideoRef.current.srcObject = stream;
       await hubConnection.current?.invoke("JoinMeeting", meetingId);
-      setIsJoined(true);
     } catch(error) {
-      toast.error("Error accessing media devices.");
+      toast.error("Error accessing camera or microphone.");
     }
   }
 
@@ -128,30 +140,44 @@ function RouteComponent() {
     try {
       await hubConnection.current?.invoke("LeaveMeeting", meetingId);
       if(localStreamRef.current) {
-        localStreamRef.current.getTracks().forEach(track => track.stop());
+        localStreamRef.current.getTracks().forEach(track => track.stop())
         localStreamRef.current = null;
-      }
-
-      peerConnection.current?.close();
-
+      };
+      Object.keys(peerConnection.current).forEach(id => closePeerConnection(id));
       setIsJoined(false);
-      
-      localVideoRef.current!.srcObject = null;
-      remoteVideoRef.current!.srcObject = null;
     } catch(error) {
       toast.error("Error leaving the meeting.");
     }
   }
 
   return (
-    <div className='h-full flex flex-col items-center'>
-      <div className='flex flex-2 flex-row p-6 gap-4 w-full'>
-        <VideoBox muted={true} videoRef={localVideoRef} />
-        <VideoBox muted={false} videoRef={remoteVideoRef} />
+    <div className='h-full flex flex-col items-center p-4'>
+      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full flex-1 overflow-y-auto'>
+        {
+          isJoined && 
+          <div className="relative">
+            <VideoBox muted={true} ref={localVideoRef} />
+            <span className="absolute bottom-2 left-2 bg-black/50 text-white px-2 py-1 rounded text-xs">
+              You
+            </span>
+          </div>
+        }
+        {remoteStreams.map((remote) => (
+          <div key={remote.connectionId} className="relative">
+             <RemoteVideo stream={remote.stream} />
+             <span className="absolute bottom-2 left-2 bg-black/50 text-white px-2 py-1 rounded text-xs">
+                {remote.user.username}
+             </span>
+          </div>
+        ))}
       </div>
-      <div className='flex flex-row items-center absolute bottom-4'>
-        { isJoined && <Button variant="destructive" onClick={leaveMeeting}>Leave meeting</Button> }
-        { !isJoined && <Button onClick={startVideo}>Join video</Button> }
+
+      <div className='mt-4 flex gap-4'>
+        {isJoined ? (
+          <Button variant="destructive" onClick={leaveMeeting}>Leave meeting</Button>
+        ) : (
+          <Button onClick={startVideo}>Join meeting</Button>
+        )}
       </div>
     </div>
   )

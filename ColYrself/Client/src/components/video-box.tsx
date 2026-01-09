@@ -1,8 +1,18 @@
-export default function VideoBox({ muted, videoRef } : 
-  { muted: boolean, videoRef: React.RefObject<HTMLVideoElement | null> }) {
+import { forwardRef } from "react";
+
+
+const VideoBox = forwardRef<HTMLVideoElement, {muted: boolean}>((props, ref) => {
   return (
-    <div className="w-1/2 max-h-full">
-      <video autoPlay playsInline muted={muted} ref={videoRef} />
+    <div className="relative w-full h-full bg-slate-900 rounded-lg overflow-hidden border border-slate-700">
+      <video
+        ref={ref}
+        autoPlay
+        playsInline
+        muted={props.muted}
+        className="w-full h-full object-cover"
+      />
     </div>
   )
-}
+})
+
+export default VideoBox;
