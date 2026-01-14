@@ -37,17 +37,17 @@ namespace ColYrself.MeetingService
         public async Task SendOffer(string targetId, string offer)
         {
             var user = await GetCurrentUser();
-            await Clients.Client(targetId).SendAsync("ReceiveOffer", user, offer, targetId);
+            await Clients.Client(targetId).SendAsync("ReceiveOffer", Context.ConnectionId, offer);
         }
         public async Task SendAnswer(string targetId, string answer)
         {
             var user = await GetCurrentUser();
-            await Clients.Client(targetId).SendAsync("ReceiveAnswer", user, answer, targetId);
+            await Clients.Client(targetId).SendAsync("ReceiveAnswer", Context.ConnectionId, answer);
         }
         public async Task SendIceCandidate(string targetId, string candidate)
         {
             var user = await GetCurrentUser();
-            await Clients.Client(targetId).SendAsync("ReceiveIceCandidate", user, candidate, targetId);
+            await Clients.Client(targetId).SendAsync("ReceiveIceCandidate", Context.ConnectionId, candidate);
         }
         public async Task LeaveMeeting(string meetingId)
         {
