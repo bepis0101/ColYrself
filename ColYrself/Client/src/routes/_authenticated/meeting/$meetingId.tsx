@@ -63,7 +63,8 @@ function RouteComponent() {
     }
     pc.ontrack = (e) => {
       const stream = e.streams[0];
-      console.log(e.track);
+      console.log("Track:", e.track.kind, e.track.readyState);
+      console.log("Streams:", e.streams);
       setRemoteStreams((prev) => ({
         ...prev,
         [connectionId]: stream
@@ -135,7 +136,7 @@ function RouteComponent() {
         await pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(answer)));
       })
 
-      hub.current.on("ReceiveCandidate", async (connectionId: string, candidate: string) => {
+      hub.current.on("ReceiveIceCandidate", async (connectionId: string, candidate: string) => {
         console.log("Received ice candidate from", connectionId);
         const pc = createPeer(hub.current, connectionId);
         await pc.addIceCandidate(JSON.parse(candidate));

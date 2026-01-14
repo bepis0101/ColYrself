@@ -1,15 +1,30 @@
 import { useEffect, useRef } from "react";
-import VideoBox from "./video-box";
 
 export default function RemoteVideo({ stream }: { stream: MediaStream }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const attachedRef = useRef(false);
 
   useEffect(() => {
-    if (!videoRef.current) return;
-    videoRef.current.srcObject = stream;
+    const video = videoRef.current;
+    if (!video || attachedRef.current) return;
+
+    video.srcObject = stream;
+    attachedRef.current = true;
+
+    video.onloadedmetadata = () => {
+      video.play().catch(() => {});
+    };
   }, [stream]);
 
   return (
-    <VideoBox muted={false} ref={videoRef} />
+    <div className="relative h-72 w-100 bg-slate-900 rounded-lg overflow-hidden border border-slate-700">
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        muted
+        className="w-full h-full object-cover"
+      />
+    </div>
   );
 }
