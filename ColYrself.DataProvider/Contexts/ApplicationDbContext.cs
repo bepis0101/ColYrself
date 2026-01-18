@@ -9,6 +9,8 @@ namespace ColYrself.DataProvider.Contexts
         public DbSet<User> Users { get; set; }
         public DbSet<Password> Passwords { get; set; }
         public DbSet<Meeting> Meetings { get; set; }
+        public DbSet<Room> Rooms { get; set; }
+        public DbSet<RoomUser> RoomUsers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -38,6 +40,21 @@ namespace ColYrself.DataProvider.Contexts
                         j => j.HasOne<User>().WithMany().HasForeignKey("UserId"),
                         j => j.HasOne<Meeting>().WithMany().HasForeignKey("MeetingId")
                     );
+            });
+
+            modelBuilder.Entity<RoomUser>(entity =>
+            {
+                entity
+                    .Property(x => x.Id)
+                    .ValueGeneratedOnAdd();
+                entity
+                    .HasOne(x => x.Room)
+                    .WithMany(x => x.RoomUsers)
+                    .HasForeignKey(x => x.RoomId);
+                entity
+                    .HasOne(x => x.User)
+                    .WithMany(x => x.RoomUsers)
+                    .HasForeignKey(x => x.UserId);
             });
 
             base.OnModelCreating(modelBuilder);

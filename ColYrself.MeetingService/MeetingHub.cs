@@ -24,36 +24,77 @@ namespace ColYrself.MeetingService
             return user.User;
         }
 
+        private async Task<bool> IsUserAllowed(string meetingId)
+        {
+            var userId = Context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var result = await _mediator.Send(new IsUserAllowedParameters() { MeetingId = meetingId, UserId = userId });
+            return result.IsUserAllowed;
+        }
+
+        private async Task LeaveMeetingInternal(string meetingId, UserDto user)
+        {
+            await Clients.OthersInGroup(meetingId).SendAsync("UserLeft", user, Context.ConnectionId);
+
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, meetingId);
+
+            await _mediator.Send(new DeleteUserFromRoomParameters()
+            {
+                MeetingId = meetingId,
+                UserId = user.Id
+            });
+
+        }
+
         public async Task JoinMeeting(string meetingId)
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, meetingId);
+            if((await IsUserAllowed(meetingId)) == false)
+            {
+                return;
+            }
             var user = await GetCurrentUser();
             if (user == null)
             {
                 return;
             }
+            var roomUsers = await _mediator.Send(new GetRoomUsersParameters()
+            {
+                MeetingId = meetingId
+            });
+            await Clients.Caller.SendAsync("ActiveUsers", roomUsers.ActiveUsers);
+            await Groups.AddToGroupAsync(Context.ConnectionId, meetingId);
+            await _mediator.Send(new AddRoomUserParameters()
+            {
+                MeetingId = meetingId,
+                UserId = user.Id,
+                ConnectionId = Context.ConnectionId
+            });
             await Clients.OthersInGroup(meetingId).SendAsync("UserJoined", user, Context.ConnectionId);
         }
         public async Task SendOffer(string targetId, string offer)
         {
-            var user = await GetCurrentUser();
             await Clients.Client(targetId).SendAsync("ReceiveOffer", Context.ConnectionId, offer);
         }
         public async Task SendAnswer(string targetId, string answer)
         {
-            var user = await GetCurrentUser();
             await Clients.Client(targetId).SendAsync("ReceiveAnswer", Context.ConnectionId, answer);
         }
         public async Task SendIceCandidate(string targetId, string candidate)
         {
-            var user = await GetCurrentUser();
             await Clients.Client(targetId).SendAsync("ReceiveIceCandidate", Context.ConnectionId, candidate);
         }
         public async Task LeaveMeeting(string meetingId)
         {
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, meetingId);
             var user = await GetCurrentUser();
-            await Clients.OthersInGroup(meetingId).SendAsync("UserLeft", user, Context.ConnectionId);
+            await LeaveMeetingInternal(meetingId, user);
+        }
+        public override async Task OnDisconnectedAsync(Exception exception)
+        {
+            var user = await GetCurrentUser();
+            var meetings = await _mediator.Send(new GetRoomUserParameters() { UserId = user.Id });
+            foreach (var meeting in meetings.MeetingIds)
+            {
+                await LeaveMeetingInternal(meeting, user);
+            }
         }
     }
 }

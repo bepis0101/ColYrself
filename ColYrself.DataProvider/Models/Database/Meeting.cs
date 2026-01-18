@@ -11,7 +11,7 @@
         // Navigation properties
         public Guid OrganizerId { get; set; }
         public User Organizer { get; set; }
-
         public ICollection<User> InvitedUsers { get; set; } = [];
+        public Room Room { get; set; }
     }
 }

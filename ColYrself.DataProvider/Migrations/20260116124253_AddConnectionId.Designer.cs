@@ -3,6 +3,7 @@ using System;
 using ColYrself.DataProvider.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ColYrself.DataProvider.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260116124253_AddConnectionId")]
+    partial class AddConnectionId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.8");
@@ -80,7 +83,7 @@ namespace ColYrself.DataProvider.Migrations
                     b.HasIndex("MeetingId")
                         .IsUnique();
 
-                    b.ToTable("Rooms");
+                    b.ToTable("Room");
                 });
 
             modelBuilder.Entity("ColYrself.DataProvider.Models.Database.RoomUser", b =>
@@ -103,9 +106,10 @@ namespace ColYrself.DataProvider.Migrations
 
                     b.HasIndex("RoomId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
-                    b.ToTable("RoomUsers");
+                    b.ToTable("RoomUser");
                 });
 
             modelBuilder.Entity("ColYrself.DataProvider.Models.Database.User", b =>
@@ -178,14 +182,14 @@ namespace ColYrself.DataProvider.Migrations
             modelBuilder.Entity("ColYrself.DataProvider.Models.Database.RoomUser", b =>
                 {
                     b.HasOne("ColYrself.DataProvider.Models.Database.Room", "Room")
-                        .WithMany("RoomUsers")
+                        .WithMany("RoomUser")
                         .HasForeignKey("RoomId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("ColYrself.DataProvider.Models.Database.User", "User")
-                        .WithMany("RoomUsers")
-                        .HasForeignKey("UserId")
+                        .WithOne("RoomUser")
+                        .HasForeignKey("ColYrself.DataProvider.Models.Database.RoomUser", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -217,7 +221,7 @@ namespace ColYrself.DataProvider.Migrations
 
             modelBuilder.Entity("ColYrself.DataProvider.Models.Database.Room", b =>
                 {
-                    b.Navigation("RoomUsers");
+                    b.Navigation("RoomUser");
                 });
 
             modelBuilder.Entity("ColYrself.DataProvider.Models.Database.User", b =>
@@ -226,7 +230,8 @@ namespace ColYrself.DataProvider.Migrations
 
                     b.Navigation("Passwords");
 
-                    b.Navigation("RoomUsers");
+                    b.Navigation("RoomUser")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

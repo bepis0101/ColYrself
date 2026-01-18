@@ -8,5 +8,6 @@
         public ICollection<Password> Passwords { get; set; } = [];
         public ICollection<Meeting> OrganizedMeetings { get; set; } = [];
         public ICollection<Meeting> InvitedMeetings { get; set; } = [];
+        public ICollection<RoomUser> RoomUsers { get; set; }
     }
 }

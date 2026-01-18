@@ -11,3 +11,9 @@ export type Register = {
   password: string;
   repeatPassword: string;
 }
+
+export type RoomUser = {
+  connectionId: string;
+  userId: string;
+  username: string;
+}
