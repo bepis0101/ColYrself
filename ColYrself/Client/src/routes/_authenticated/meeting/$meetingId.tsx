@@ -14,6 +14,11 @@ export const Route = createFileRoute('/_authenticated/meeting/$meetingId')({
   component: RouteComponent,
 })
 
+type MediaState = {
+  camera: boolean;
+  microphone: boolean;
+}
+
 function RouteComponent() {
   const config = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
   const [isJoined, setIsJoined] = useState(false);
@@ -21,6 +26,7 @@ function RouteComponent() {
   const [camOn, setCamOn] = useState(true);
   const [localUserMedia, setLocalUserMedia] = useState<MediaStream | null>(null);
   const [remoteStreams, setRemoteStreams] = useState<Record<string, MediaStream>>({});
+  const [peerMediaState, setPeerMediaState] = useState<Record<string, MediaState>>({});
   const [activePeers, setActivePeers] = useState<string[]>([])
 
   const peers = useRef<Record<string, RTCPeerConnection>>({});
@@ -32,11 +38,27 @@ function RouteComponent() {
   const { user } = useAuth();
   
   const micClickEvent = () => {
-    setMicOn(prev => !prev);
+    const newState = !micOn
+    localUserMedia?.getAudioTracks().forEach(t => {
+      t.enabled = newState;
+    })
+    setMicOn(newState);
+    hub.current?.invoke("MediaStateChanged", meetingId, JSON.stringify({
+      camera: camOn,
+      microphone: newState
+    }));
   }
 
   const camClickEvent = () => {
-    setCamOn(prev => !prev);
+    const newState = !camOn
+    localUserMedia?.getVideoTracks().forEach(t => {
+      t.enabled = newState;
+    })
+    setCamOn(newState);
+    hub.current?.invoke("MediaStateChanged", meetingId, JSON.stringify({
+      camera: newState,
+      microphone: micOn
+    }));
   }
 
   const startHub = async () => {
@@ -98,11 +120,24 @@ function RouteComponent() {
       await pc.addIceCandidate(JSON.parse(candidate));
     })
 
+    hub.current?.on("UserMediaStateChanged", async (connectionId: string, stateChange: string) => {
+      const state = JSON.parse(stateChange) as MediaState
+      setPeerMediaState(prev => ({
+        ...prev,
+        [connectionId]: state
+      }))
+    })
+
     hub.current?.on("UserLeft", async (user: User, connectionId: string) => {
       toast.info(`${user.username} left the meeting`);
       setActivePeers(prev => {
         const filtered = prev.filter(x => x !== connectionId);
         return filtered;
+      });
+      setPeerMediaState(prev => {
+        const cp = {...prev};
+        delete cp[connectionId];
+        return cp;
       })
       peers.current[connectionId].close()
       delete peers.current[connectionId];
@@ -116,6 +151,7 @@ function RouteComponent() {
     await hub.current?.invoke("LeaveMeeting", meetingId);
     setIsJoined(false);
     setRemoteStreams({});
+    setPeerMediaState({});
     setActivePeers([]);
     peerData.current = {};
     peers.current = {}
@@ -134,11 +170,18 @@ function RouteComponent() {
     }
     pc.ontrack = (e) => {
       const stream = e.streams[0];
-      console.log("Track:", e.track.kind, e.track.readyState);
-      console.log("Streams:", e.streams);
       setRemoteStreams((prev) => ({
         ...prev,
         [connectionId]: stream
+      }));
+      const cam = stream.getVideoTracks().length > 0;
+      const mic = stream.getAudioTracks().length > 0;
+      setPeerMediaState(prev => ({
+        ...prev,
+        [connectionId]: {
+          camera: cam,
+          microphone: mic
+        }
       }))
     }
     
@@ -169,7 +212,7 @@ function RouteComponent() {
   
   return (
     <div className='min-h-full flex flex-col items-center p-4'>
-      <div className='min-h-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full flex-1 overflow-y-auto'>
+      <div className='min-h-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full flex-1'>
         <div className="relative">
           {
             camOn ?
@@ -194,7 +237,7 @@ function RouteComponent() {
         {activePeers.map((connectionId: string) => (
           <div key={`id-${connectionId}`} className="relative">
             {
-              remoteStreams[connectionId] ?
+              remoteStreams[connectionId] && peerMediaState[connectionId].camera ?
               <RemoteVideo stream={remoteStreams[connectionId]} /> :
               <div className="relative bg-slate-900 rounded-lg 
               overflow-hidden border border-slate-700 items-center justify-center flex

@@ -22,7 +22,6 @@ export default function RemoteVideo({ stream }: { stream: MediaStream }) {
         ref={videoRef}
         autoPlay
         playsInline
-        muted
         className="w-full h-full object-cover"
       />
     </div>

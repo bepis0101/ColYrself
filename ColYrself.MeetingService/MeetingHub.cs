@@ -82,6 +82,10 @@ namespace ColYrself.MeetingService
         {
             await Clients.Client(targetId).SendAsync("ReceiveIceCandidate", Context.ConnectionId, candidate);
         }
+        public async Task MediaStateChanged(string meetingId, string mediaState)
+        {
+            await Clients.OthersInGroup(meetingId).SendAsync("UserMediaStateChanged", Context.ConnectionId, mediaState);
+        }
         public async Task LeaveMeeting(string meetingId)
         {
             var user = await GetCurrentUser();
