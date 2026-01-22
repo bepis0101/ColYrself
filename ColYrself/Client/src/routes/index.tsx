@@ -7,7 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
-import { Video, ScreenShare, Lock } from "lucide-react";
+import { Video, Lock } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
@@ -20,12 +20,12 @@ function LandingPage() {
     <main className="container mx-auto px-4">
       <section className="flex flex-col items-center justify-center py-24 text-center md:py-32">
         <h1 className="text-4xl font-extrabold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl">
-          Crystal-Clear Video Calls.{" "}
           <span className="bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent">
-            Finally Simple.
+            ColYrself
           </span>
         </h1>
         <p className="mt-4 max-w-[700px] text-lg text-muted-foreground md:text-xl">
+          Crystal-clear video calls, finally simple.
           Host and join high-definition video meetings with anyone, anywhere.{" "}
           <strong className="whitespace-nowrap bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent">
             Col Yrself
@@ -38,9 +38,6 @@ function LandingPage() {
               {user ? "Go to Your Dashboard" : "Get Started for Free"}
             </Link>
           </Button>
-          <Button asChild variant="outline" size="lg">
-            <a href="http://github.com/bepis0101/ColYrself">Learn More</a>
-          </Button>
         </div>
       </section>
       <section className="py-16 md:py-24">
@@ -52,7 +49,7 @@ function LandingPage() {
             All the essential features, with none of the clutter.
           </p>
         </div>
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
           <Card className="flex flex-col text-center">
             <CardHeader>
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
@@ -63,22 +60,7 @@ function LandingPage() {
             <CardContent>
               <p className="text-muted-foreground">
                 Experience crisp, clear video and lag-free audio. Stay
-                connected with reliable performance, even in large team meetings.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="flex flex-col text-center">
-            <CardHeader>
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <ScreenShare className="h-6 w-6" />
-              </div>
-              <CardTitle className="pt-4">Easy Screen Sharing</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Share your entire screen, a specific window, or a browser tab
-                with a single click. Perfect for presentations and demos.
+                connected with reliable performance.
               </p>
             </CardContent>
           </Card>
