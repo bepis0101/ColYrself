@@ -156,11 +156,13 @@ export default function CreateEvent({ date, open, setOpen, editMeetingId } :
   function handleSubmitEvent() {
     if (formVm.time === "") {
       toast.error("Time cannot be empty")
+      setOpen(false);
       return
     }
-
+    
     if (isPast(formVm)) {
-      toast.error("Date cannot be earlier than now")
+      toast.error("Date cannot be set earlier than now")
+      setOpen(false);
       return
     }
 

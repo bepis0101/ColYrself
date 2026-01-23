@@ -9,6 +9,7 @@ import { PenIcon, TrashIcon } from "lucide-react"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "./ui/alert-dialog"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
+import { useAuth } from "@/contexts/AuthContext"
 
 function convertDate(date: Date): string {
   const year = date.getFullYear();
@@ -43,6 +44,8 @@ export default function Calendar31({ meetings }: { meetings: Meeting[] }) {
     }
     return {}
   }
+
+  const { user } = useAuth();
 
   const deleteMutation = useMutation({ 
     mutationKey: ['deleteMeeting', editMeetingId],
@@ -80,7 +83,7 @@ export default function Calendar31({ meetings }: { meetings: Meeting[] }) {
                 year: "numeric",
               })}
             </div>
-            <Button onClick={() => setOpen(true)}>Create Event</Button>
+            <Button onClick={() => setOpen(true)}>Create Meeting</Button>
           </div>
           <div className="flex w-full flex-col gap-2">
             {filtered.map((meeting) => (
@@ -97,43 +100,49 @@ export default function Calendar31({ meetings }: { meetings: Meeting[] }) {
                 </div>
                 <div className="flex flex-row justify-end space-x-2 items-center">
                   {meeting.date == convertDate(date) && <Link 
-                    className="text-blue-600 hover:underline"
+                    className="text-blue-600 hover:underline p-2"
                     to={`/meeting/$meetingId`}
                     params={{ meetingId: meeting.id }}>
                     Join Meeting
                   </Link>}
-                  <Button variant="outline" className="w-8 h-8 flex justify-center
-                    p-1 border-1 border-gray-500 rounded-md hover:bg-secondary/50"
-                    onClick={() => {setOpen(true); setEditMeetingId(meeting.id);}}
-                  >
-                    <PenIcon />
-                  </Button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
+                  {
+                    user?.id == meeting.organizerId ?
+                    <React.Fragment>
                       <Button variant="outline" className="w-8 h-8 flex justify-center
-                      p-1 border-1 border-red-500 rounded-md hover:bg-secondary/50">
-                        <TrashIcon color='red' />
+                        p-1 border-1 border-gray-500 rounded-md hover:bg-secondary/50"
+                        onClick={() => {setOpen(true); setEditMeetingId(meeting.id);}}
+                      >
+                        <PenIcon />
                       </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          Are you sure you want to delete this meeting?
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>
-                          Cancel
-                        </AlertDialogCancel>
-                        <AlertDialogAction onClick={() => deleteMutation.mutate(meeting.id)}>
-                          Continue
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="outline" className="w-8 h-8 flex justify-center
+                          p-1 border-1 border-red-500 rounded-md hover:bg-secondary/50">
+                            <TrashIcon color='red' />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              Are you sure you want to delete this meeting?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>
+                              Cancel
+                            </AlertDialogCancel>
+                            <AlertDialogAction onClick={() => deleteMutation.mutate(meeting.id)}>
+                              Continue
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </React.Fragment> :
+                    <div className="w-18"></div>
+                  }
                 </div>
               </div>
             ))}

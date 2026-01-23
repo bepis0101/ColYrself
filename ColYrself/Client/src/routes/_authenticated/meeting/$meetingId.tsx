@@ -211,15 +211,14 @@ function RouteComponent() {
   
   
   return (
-    <div className='min-h-full flex flex-col items-center p-4'>
+    <div className='min-h-screen flex flex-col items-center p-4'>
       <div className='min-h-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full flex-1'>
-        <div className="relative">
+        <div className="relative w-100 h-72">
           {
             camOn ?
             <VideoBox muted={true} ref={localVideoRef} /> : 
-            <div className="relative bg-slate-900 rounded-lg 
-              overflow-hidden border border-slate-700 items-center justify-center flex
-              w-72 h-72"
+            <div className="bg-slate-900 rounded-lg 
+              overflow-hidden border border-slate-700 items-center justify-center flex w-100 h-72"
             >
              <Avatar className="h-16 w-16">
                 <AvatarImage
@@ -235,13 +234,13 @@ function RouteComponent() {
           </span>
         </div>
         {activePeers.map((connectionId: string) => (
-          <div key={`id-${connectionId}`} className="relative">
+          <div key={`id-${connectionId}`} className="relative w-100 h-72">
             {
               remoteStreams[connectionId] && peerMediaState[connectionId].camera ?
               <RemoteVideo stream={remoteStreams[connectionId]} /> :
-              <div className="relative bg-slate-900 rounded-lg 
+              <div className="bg-slate-900 rounded-lg 
               overflow-hidden border border-slate-700 items-center justify-center flex
-              w-72 h-72"
+              w-100 h-72"
               >
                 {peerData.current[connectionId] &&
                 <Avatar className="h-16 w-16">

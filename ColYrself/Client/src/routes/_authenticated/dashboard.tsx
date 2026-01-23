@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import React from 'react';
 import type { User } from '@/types/user';
+import { useAuth } from '@/contexts/AuthContext';
 
 
 export interface Meeting {
@@ -98,6 +99,8 @@ function RouteComponent() {
     }
   });
 
+  const { user } = useAuth();
+
   return (
     <>
       <div className="align-center justify-center flex flex-col">
@@ -137,41 +140,48 @@ function RouteComponent() {
                             <Link 
                               to={`/meeting/$meetingId`}
                               params={{ meetingId: meeting.id }}
-                              className="text-blue-600 hover:underline mr-9">
+                              className="text-blue-600 hover:underline p-2">
                               Join Meeting
                             </Link>
-                            <Button variant="outline" className="w-8 h-8 flex justify-center 
-                              p-1 border-1 border-gray-500 rounded-md hover:bg-secondary/50"
-                              onClick={() => {setOpen(true); setEditMeetingId(meeting.id);}}
-                            >
-                              <PenIcon />
-                            </Button>
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button variant="outline" className="w-8 h-8 flex justify-center 
-                                p-1 border-1 border-red-500 rounded-md hover:bg-secondary/50">
-                                  <TrashIcon color='red' />
+                            {
+                              user?.id == meeting.organizerId ?
+                              <React.Fragment>
+                                <Button variant="outline" className="w-8 h-8 flex justify-center
+                                  p-1 border-1 border-gray-500 rounded-md hover:bg-secondary/50"
+                                  onClick={() => {setOpen(true); setEditMeetingId(meeting.id);}}
+                                >
+                                  <PenIcon />
                                 </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>
-                                    Are you sure you want to delete this meeting?
-                                  </AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    This action cannot be undone.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>
-                                    Cancel
-                                  </AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => deleteMutation.mutate(meeting.id)}>
-                                    Continue
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button variant="outline" className="w-8 h-8 flex justify-center
+                                    p-1 border-1 border-red-500 rounded-md hover:bg-secondary/50">
+                                      <TrashIcon color='red' />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>
+                                        Are you sure you want to delete this meeting?
+                                      </AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        This action cannot be undone.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>
+                                        Cancel
+                                      </AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => deleteMutation.mutate(meeting.id)}>
+                                        Continue
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </React.Fragment>
+                              :
+                              <div className='w-18'></div>
+                            }
                           </div>
                         </TableCell>
                       </TableRow>
