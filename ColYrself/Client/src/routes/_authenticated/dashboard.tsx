@@ -112,73 +112,78 @@ function RouteComponent() {
               </EmptyHeader>
               <EmptyContent>
                 <div className='flex flex-row'>
-                  <Button onClick={() => { setEditMeetingId(null); setOpen(true); }}>Create Event</Button>
+                  <Button onClick={() => { setEditMeetingId(null); setOpen(true); }}>Create Meeting</Button>
                 </div>
               </EmptyContent>
             </Empty>
           ) : (
-            <div className="m-9 p-3 border-1 rounded-2xl">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Time</TableHead>
-                    <TableHead className="text-right"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {data.map((meeting) => (
-                    <TableRow key={meeting.id}>
-                      <TableCell>{meeting.name}</TableCell>
-                      <TableCell>{parseMeetingTime(meeting, Date.now())}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex flex-row justify-end space-x-2 items-center">
-                          <Link 
-                            to={`/meeting/$meetingId`}
-                            params={{ meetingId: meeting.id }}
-                            className="text-blue-600 hover:underline mr-9">
-                            Join Meeting
-                          </Link>
-                          <Button variant="outline" className="w-8 h-8 flex justify-center 
-                            p-1 border-1 border-gray-500 rounded-md hover:bg-secondary/50"
-                            onClick={() => {setOpen(true); setEditMeetingId(meeting.id);}}
-                          >
-                            <PenIcon />
-                          </Button>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="outline" className="w-8 h-8 flex justify-center 
-                              p-1 border-1 border-red-500 rounded-md hover:bg-secondary/50">
-                                <TrashIcon color='red' />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>
-                                  Are you sure you want to delete this meeting?
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  This action cannot be undone.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>
-                                  Cancel
-                                </AlertDialogCancel>
-                                <AlertDialogAction onClick={() => deleteMutation.mutate(meeting.id)}>
-                                  Continue
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
-                      </TableCell>
+            <div className='flex flex-col justify-center'>
+              <div className="m-9 p-3 border-1 rounded-2xl">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Time</TableHead>
+                      <TableHead className="text-right"></TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {data.map((meeting) => (
+                      <TableRow key={meeting.id}>
+                        <TableCell>{meeting.name}</TableCell>
+                        <TableCell>{parseMeetingTime(meeting, Date.now())}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex flex-row justify-end space-x-2 items-center">
+                            <Link 
+                              to={`/meeting/$meetingId`}
+                              params={{ meetingId: meeting.id }}
+                              className="text-blue-600 hover:underline mr-9">
+                              Join Meeting
+                            </Link>
+                            <Button variant="outline" className="w-8 h-8 flex justify-center 
+                              p-1 border-1 border-gray-500 rounded-md hover:bg-secondary/50"
+                              onClick={() => {setOpen(true); setEditMeetingId(meeting.id);}}
+                            >
+                              <PenIcon />
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="outline" className="w-8 h-8 flex justify-center 
+                                p-1 border-1 border-red-500 rounded-md hover:bg-secondary/50">
+                                  <TrashIcon color='red' />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>
+                                    Are you sure you want to delete this meeting?
+                                  </AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>
+                                    Cancel
+                                  </AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => deleteMutation.mutate(meeting.id)}>
+                                    Continue
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              <div className='flex flex-row justify-center'>
+                <Button onClick={() => { setEditMeetingId(null); setOpen(true); }}>Create Meeting</Button>
+              </div>
             </div>
-          )
+            )
         }
       </div>
       <CreateEvent
