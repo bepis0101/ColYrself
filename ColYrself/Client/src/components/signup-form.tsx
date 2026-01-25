@@ -152,7 +152,7 @@ export function SignupForm({
                   Already have an account? <Link to="/auth/login">Sign in</Link>
                 </FieldDescription>
               </Field>
-            <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
+            {/* <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
                 Or continue with
             </FieldSeparator>
             <Field className="grid grid-cols-1 gap-4">
@@ -165,7 +165,7 @@ export function SignupForm({
                   </svg>
                   <span className="sr-only">Sign up with Google</span>
               </Button>
-            </Field>
+            </Field> */}
             </FieldGroup>
           </form>
         </CardContent>

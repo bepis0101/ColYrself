@@ -155,6 +155,7 @@ function RouteComponent() {
     setActivePeers([]);
     peerData.current = {};
     peers.current = {}
+    localUserMedia?.getTracks().forEach(x => x.stop())
   }
 
   const createPeer = (hub: SignalR.HubConnection | null, connectionId: string) => {
@@ -204,6 +205,7 @@ function RouteComponent() {
       }
     };
     initMedia();
+
   }, [])
 
   useEffect(() => {

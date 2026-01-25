@@ -99,7 +99,7 @@ export function LoginForm({
               </FieldDescription>
             </div>
           </form>
-          <div className="mt-6 flex flex-col gap-4">
+          {/* <div className="mt-6 flex flex-col gap-4">
             <div className="relative text-center text-sm">
               <div className="absolute inset-0 top-1/2 border-t border-border" />
               <span className="relative bg-card px-2 text-muted-foreground">
@@ -121,7 +121,7 @@ export function LoginForm({
               </svg>
               Login with Google
             </Button>
-          </div>
+          </div> */}
         </CardContent>
       </Card>
       {/* <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
