@@ -162,7 +162,10 @@ function RouteComponent() {
     if(foundPeer) return foundPeer;
     console.log("Creating peer connection");
     const pc = new RTCPeerConnection(config);
-    localUserMedia?.getTracks().forEach(x => pc.addTrack(x, localUserMedia));
+    localUserMedia?.getTracks().forEach(x => {
+      if(x.kind == "audio" && micOn) pc.addTrack(x, localUserMedia)
+      if(x.kind == "video" && camOn) pc.addTrack(x, localUserMedia)
+    });
     pc.onicecandidate = (e) => {
       if(e.candidate && hub?.state === SignalR.HubConnectionState.Connected) {
         hub?.invoke("SendIceCandidate", connectionId, JSON.stringify(e.candidate))

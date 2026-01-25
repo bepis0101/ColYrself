@@ -144,14 +144,14 @@ function TopMenu() {
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
                 )}
-                <DropdownMenuItem className='cursor-pointer'>
+                {/* <DropdownMenuItem className='cursor-pointer'>
                   <CircleUser className="mr-2 h-4 w-4" />
                   <span>Profile</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem className='cursor-pointer'>
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Settings</span>
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className='cursor-pointer' onClick={() => logout()}>
                   <LogOut className="mr-2 h-4 w-4" />
